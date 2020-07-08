@@ -1,27 +1,45 @@
-import React from 'react';
-import logo from './logo.svg';
+import 'rsuite/dist/styles/rsuite-dark.css';
+
 import './App.css';
+
+import { Breadcrumb, Container, Content, Footer, Header, Table } from 'rsuite';
+import * as React from 'react';
+
+const { Column, HeaderCell, Cell } = Table;
 
 interface AppProps {}
 
+const files = [
+  { name: 'abc', size: '--' },
+  { name: 'xyz', size: '--' },
+];
+
 function App({}: AppProps) {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Container className="main">
+      <Header>
+        <Breadcrumb>
+          <Breadcrumb.Item>Home</Breadcrumb.Item>
+          <Breadcrumb.Item>Components</Breadcrumb.Item>
+          <Breadcrumb.Item active>Breadcrumb</Breadcrumb.Item>
+        </Breadcrumb>
+      </Header>
+
+      <Content>
+        <Table data={files}>
+          <Column flexGrow={1}>
+            <HeaderCell>Name</HeaderCell>
+            <Cell dataKey="name" />
+          </Column>
+          <Column>
+            <HeaderCell>Size</HeaderCell>
+            <Cell dataKey="size" />
+          </Column>
+        </Table>
+      </Content>
+
+      <Footer className="status"><small>2 folders</small></Footer>
+    </Container>
   );
 }
 
