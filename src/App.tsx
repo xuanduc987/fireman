@@ -245,7 +245,10 @@ function App({}: AppProps) {
             <Placeholder.Paragraph active rows={1} />
           )}
         </Breadcrumb>
-        <small>2 folders</small>
+        <small>
+          {children.filter((f) => f.kind == 'dir').length} folders,{' '}
+          {children.filter((f) => f.kind == 'file').length} files
+        </small>
       </Footer>
 
       <Modal show={show}>
