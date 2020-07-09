@@ -1,10 +1,12 @@
 import type { Api, FileId, FileInfo } from './type';
 
 const d = new Date();
-const RootId = '' as FileId;
-const Root: FileInfo = {
+
+export const RootId = '' as FileId;
+
+export const Root: FileInfo = {
   id: RootId,
-  name: '',
+  name: 'Root',
   path: [],
   modifiedTime: d,
   readonly: false,
@@ -42,7 +44,7 @@ export const makeDummyApi = (): Api => {
 
   let makeDir = (parentId: FileId, name: string): Promise<FileInfo> => {
     let parent = files[parentId];
-    let path = parent.path.concat(parent.name);
+    let path = parent.path.concat(parent);
     let fi: FileInfo = {
       id: String(i++) as FileId,
       name,
@@ -64,10 +66,15 @@ export const makeDummyApi = (): Api => {
     return delay(files[id], 100);
   };
 
+  let show = (id: FileId): Promise<FileInfo> => {
+    return delay(files[id], Math.random() * 1000);
+  };
+
   return {
     ls,
     rm,
     makeDir,
     rename,
+    show,
   };
 };
