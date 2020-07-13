@@ -4,14 +4,22 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "ts-node-dev --respawn --transpile-only src/index.ts"
+    "start": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "codegen": "graphql-codegen --config codegen.yml"
   },
   "dependencies": {
-    "@types/express": "^4.17.7",
     "@types/node": "^14.0.22",
-    "express": "^4.17.1"
+    "apollo-server": "^2.15.1",
+    "dataloader": "^2.0.0",
+    "graphql": "^14.5.0",
+    "graphql-scalars": "^1.2.1"
   },
   "devDependencies": {
+    "@graphql-codegen/add": "^1.17.0",
+    "@graphql-codegen/cli": "1.17.0",
+    "@graphql-codegen/introspection": "1.17.0",
+    "@graphql-codegen/typescript": "1.17.0",
+    "@graphql-codegen/typescript-resolvers": "1.17.0",
     "ts-node-dev": "^1.0.0-pre.51",
     "typescript": "^3.9.6"
   }
