@@ -20,6 +20,7 @@
     "@graphql-codegen/introspection": "1.17.0",
     "@graphql-codegen/typescript": "1.17.0",
     "@graphql-codegen/typescript-resolvers": "1.17.0",
+    "@graphql-tools/merge": "^6.0.12",
     "ts-node-dev": "^1.0.0-pre.51",
     "typescript": "^3.9.6"
   }

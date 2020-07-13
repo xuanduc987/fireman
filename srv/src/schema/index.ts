@@ -1,23 +1,14 @@
 import { DateTimeResolver, DateTimeTypeDefinition } from 'graphql-scalars';
 
+import { mergeTypeDefs, mergeResolvers } from '@graphql-tools/merge';
+
 import { typeDef as File, resolvers as fileResolvers } from './file';
-import { Resolvers } from '../generated/graphql';
 
-const Query = `
-  type Query {
-    fileById(id: ID!): FileInfo!
-  }
-`;
+export const typeDefs = mergeTypeDefs([DateTimeTypeDefinition, File]);
 
-export const typeDefs = [DateTimeTypeDefinition, File, Query];
-const queryResolver: Resolvers = {
-  Query: {
-    fileById: (_, { id }) => ({ id: id ? id : '/' }),
+export const resolvers = mergeResolvers([
+  fileResolvers as any,
+  {
+    DateTime: DateTimeResolver,
   },
-};
-
-export const resolvers = {
-  ...fileResolvers,
-  ...queryResolver,
-  DateTime: DateTimeResolver,
-};
+]);

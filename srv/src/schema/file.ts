@@ -1,9 +1,9 @@
-import { FileStat } from '../context';
+import { gql } from 'apollo-server';
 
-import { Context } from '../context';
+import { Context, FileStat } from '../context';
 import { Resolvers } from '../generated/graphql';
 
-export const typeDef = `
+export const typeDef = gql`
   interface FileInfo {
     id: ID!
     modifiedTime: DateTime!
@@ -25,6 +25,10 @@ export const typeDef = `
     name: String!
     path: [Folder!]!
     children: [FileInfo!]!
+  }
+
+  type Query {
+    fileById(id: ID!): FileInfo!
   }
 `;
 
@@ -59,5 +63,8 @@ export const resolvers: Resolvers = {
     children: async ({ id }, _, { dirLoader }) => {
       return await dirLoader.load(id);
     },
+  },
+  Query: {
+    fileById: (_, { id }) => ({ id: id ? id : '/' }),
   },
 };
