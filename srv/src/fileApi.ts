@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { fileExistError } from './error';
 const fsp = fs.promises;
 
 const PUBLIC = path.join(__dirname, '../public/files');
@@ -64,24 +65,42 @@ export const loadDir = async (id: string) => {
   }));
 };
 
-export const uploadFile = async (
+type FileUpload = {
+  file: Promise<{ createReadStream: () => fs.ReadStream }>;
+  name: string;
+};
+
+export const uploadFiles = async (
   parentId: string,
-  name: string,
-  stream: fs.ReadStream,
+  files: Array<FileUpload>,
 ) => {
-  let newId =path.join(parentId, name);
-  let exist = false;
-  try {
-    await loadFile(newId);
-    exist = true;
-  } catch (_) {
-    exist = false;
-  }
-  console.info(exist);
-  if (exist) throw new Error('File exsisted ' + newId);
-  let wstream = fs.createWriteStream(normalize(newId));
-  await new Promise((resolve, reject) =>
-    stream.pipe(wstream).on('finish', resolve).on('error', reject),
+  let children = await fsp.readdir(normalize(parentId));
+
+  let [existings, toCreates] = files.reduce(
+    ([existings, toCreates], f) => {
+      let { name } = f;
+      if (children.indexOf(name) >= 0) {
+        existings.push(f);
+      } else {
+        toCreates.push(f);
+      }
+      return [existings, toCreates];
+    },
+    [[], []] as [FileUpload[], FileUpload[]],
   );
-  return { id: newId };
+
+  let errors = existings.map(({ name }) => fileExistError(name));
+  let createds = await Promise.all(
+    toCreates.map(async (f) => {
+      let newId = path.join(parentId, f.name);
+      let wstream = fs.createWriteStream(normalize(newId));
+      let rstream = (await f.file).createReadStream();
+      await new Promise((resolve, reject) =>
+        rstream.pipe(wstream).on('finish', resolve).on('error', reject),
+      );
+      return { id: newId };
+    }),
+  );
+
+  return { files: createds, errors: errors.length ? errors : null };
 };

@@ -1,9 +1,7 @@
 import { gql } from 'apollo-server';
 
-import { ReadStream } from 'fs';
-
 import { Context } from '../context';
-import { FileStat, uploadFile } from '../fileApi';
+import { FileStat, uploadFiles } from '../fileApi';
 import { Resolvers } from '../generated/graphql';
 
 export const typeDef = gql`
@@ -34,14 +32,28 @@ export const typeDef = gql`
     fileById(id: ID!): FileInfo!
   }
 
+  type FileExistError {
+    message: String!
+    fileName: String!
+  }
+
   input UploadFileInput {
-    name: String!
-    parent: ID!
     file: Upload!
+    name: String!
+  }
+
+  input UploadFilesInput {
+    parent: ID!
+    files: [UploadFileInput!]!
+  }
+
+  type UploadFilesPayload {
+    files: [FileInfo!]
+    errors: [FileExistError!]
   }
 
   type Mutation {
-    uploadFile(input: UploadFileInput!): FileInfo!
+    uploadFiles(input: UploadFilesInput!): UploadFilesPayload!
   }
 `;
 
@@ -81,11 +93,9 @@ export const resolvers: Resolvers = {
     fileById: (_, { id }) => ({ id: id ? id : '/' }),
   },
   Mutation: {
-    uploadFile: async (_, { input }) => {
-      let { file, name, parent } = input
-      let { createReadStream } = await file;
-      let stream: ReadStream = createReadStream();
-      return await uploadFile(parent, name, stream)
+    uploadFiles: async (_, { input }) => {
+      let { files, parent } = input
+      return await uploadFiles(parent, files)
     },
   },
 };

@@ -6,8 +6,8 @@ generates:
     plugins:
       - "typescript"
       - "typescript-resolvers"
-      - add: "type PartialId<T> = T extends { id: any } ? Partial<Omit<T, 'id'>> & Pick<T, 'id'> : Partial<T>"
+      - add: "export type DeepPartial<T> = T extends Function ? T : (T extends object ? T extends { id: any } ? { [P in keyof Omit<T, 'id'>]?: DeepPartial<T[P]>; } & Pick<T, 'id'> : { [P in keyof T]?: DeepPartial<T[P]>; } : T);"
     config:
       contextType: ../context#Context
-      defaultMapper: PartialId<{T}>
+      defaultMapper: DeepPartial<{T}>
 

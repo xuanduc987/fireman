@@ -3,7 +3,7 @@ import { Context } from '../context';
 export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: any }> = { [K in keyof T]: T[K] };
 export type RequireFields<T, K extends keyof T> = { [X in Exclude<keyof T, K>]?: T[X] } & { [P in K]-?: NonNullable<T[P]> };
-type PartialId<T> = T extends { id: any } ? Partial<Omit<T, 'id'>> & Pick<T, 'id'> : Partial<T>
+export type DeepPartial<T> = T extends Function ? T : (T extends object ? T extends { id: any } ? { [P in keyof Omit<T, 'id'>]?: DeepPartial<T[P]>; } & Pick<T, 'id'> : { [P in keyof T]?: DeepPartial<T[P]>; } : T);
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -32,6 +32,12 @@ export type File = FileInfo & {
   size?: Maybe<Scalars['Int']>;
 };
 
+export type FileExistError = {
+  __typename?: 'FileExistError';
+  message: Scalars['String'];
+  fileName: Scalars['String'];
+};
+
 export type FileInfo = {
   id: Scalars['ID'];
   modifiedTime: Scalars['DateTime'];
@@ -50,12 +56,12 @@ export type Folder = FileInfo & {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  uploadFile: FileInfo;
+  uploadFiles: UploadFilesPayload;
 };
 
 
-export type MutationUploadFileArgs = {
-  input: UploadFileInput;
+export type MutationUploadFilesArgs = {
+  input: UploadFilesInput;
 };
 
 export type Query = {
@@ -70,9 +76,19 @@ export type QueryFileByIdArgs = {
 
 
 export type UploadFileInput = {
-  name: Scalars['String'];
-  parent: Scalars['ID'];
   file: Scalars['Upload'];
+  name: Scalars['String'];
+};
+
+export type UploadFilesInput = {
+  parent: Scalars['ID'];
+  files: Array<UploadFileInput>;
+};
+
+export type UploadFilesPayload = {
+  __typename?: 'UploadFilesPayload';
+  files?: Maybe<Array<FileInfo>>;
+  errors?: Maybe<Array<FileExistError>>;
 };
 
 
@@ -154,34 +170,40 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
   Query: ResolverTypeWrapper<{}>;
-  ID: ResolverTypeWrapper<PartialId<Scalars['ID']>>;
+  ID: ResolverTypeWrapper<DeepPartial<Scalars['ID']>>;
   FileInfo: ResolversTypes['Folder'] | ResolversTypes['File'];
-  DateTime: ResolverTypeWrapper<PartialId<Scalars['DateTime']>>;
-  String: ResolverTypeWrapper<PartialId<Scalars['String']>>;
-  Folder: ResolverTypeWrapper<PartialId<Folder>>;
+  DateTime: ResolverTypeWrapper<DeepPartial<Scalars['DateTime']>>;
+  String: ResolverTypeWrapper<DeepPartial<Scalars['String']>>;
+  Folder: ResolverTypeWrapper<DeepPartial<Folder>>;
   Mutation: ResolverTypeWrapper<{}>;
-  UploadFileInput: ResolverTypeWrapper<PartialId<UploadFileInput>>;
-  Upload: ResolverTypeWrapper<PartialId<Scalars['Upload']>>;
-  Boolean: ResolverTypeWrapper<PartialId<Scalars['Boolean']>>;
-  File: ResolverTypeWrapper<PartialId<File>>;
-  Int: ResolverTypeWrapper<PartialId<Scalars['Int']>>;
-  CacheControlScope: ResolverTypeWrapper<PartialId<CacheControlScope>>;
+  UploadFilesInput: ResolverTypeWrapper<DeepPartial<UploadFilesInput>>;
+  UploadFileInput: ResolverTypeWrapper<DeepPartial<UploadFileInput>>;
+  Upload: ResolverTypeWrapper<DeepPartial<Scalars['Upload']>>;
+  UploadFilesPayload: ResolverTypeWrapper<DeepPartial<UploadFilesPayload>>;
+  FileExistError: ResolverTypeWrapper<DeepPartial<FileExistError>>;
+  Boolean: ResolverTypeWrapper<DeepPartial<Scalars['Boolean']>>;
+  File: ResolverTypeWrapper<DeepPartial<File>>;
+  Int: ResolverTypeWrapper<DeepPartial<Scalars['Int']>>;
+  CacheControlScope: ResolverTypeWrapper<DeepPartial<CacheControlScope>>;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
   Query: {};
-  ID: PartialId<Scalars['ID']>;
+  ID: DeepPartial<Scalars['ID']>;
   FileInfo: ResolversParentTypes['Folder'] | ResolversParentTypes['File'];
-  DateTime: PartialId<Scalars['DateTime']>;
-  String: PartialId<Scalars['String']>;
-  Folder: PartialId<Folder>;
+  DateTime: DeepPartial<Scalars['DateTime']>;
+  String: DeepPartial<Scalars['String']>;
+  Folder: DeepPartial<Folder>;
   Mutation: {};
-  UploadFileInput: PartialId<UploadFileInput>;
-  Upload: PartialId<Scalars['Upload']>;
-  Boolean: PartialId<Scalars['Boolean']>;
-  File: PartialId<File>;
-  Int: PartialId<Scalars['Int']>;
+  UploadFilesInput: DeepPartial<UploadFilesInput>;
+  UploadFileInput: DeepPartial<UploadFileInput>;
+  Upload: DeepPartial<Scalars['Upload']>;
+  UploadFilesPayload: DeepPartial<UploadFilesPayload>;
+  FileExistError: DeepPartial<FileExistError>;
+  Boolean: DeepPartial<Scalars['Boolean']>;
+  File: DeepPartial<File>;
+  Int: DeepPartial<Scalars['Int']>;
 };
 
 export interface DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['DateTime'], any> {
@@ -194,6 +216,12 @@ export type FileResolvers<ContextType = Context, ParentType extends ResolversPar
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   path?: Resolver<Array<ResolversTypes['Folder']>, ParentType, ContextType>;
   size?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType>;
+};
+
+export type FileExistErrorResolvers<ContextType = Context, ParentType extends ResolversParentTypes['FileExistError'] = ResolversParentTypes['FileExistError']> = {
+  message?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  fileName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType>;
 };
 
@@ -215,7 +243,7 @@ export type FolderResolvers<ContextType = Context, ParentType extends ResolversP
 };
 
 export type MutationResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
-  uploadFile?: Resolver<ResolversTypes['FileInfo'], ParentType, ContextType, RequireFields<MutationUploadFileArgs, 'input'>>;
+  uploadFiles?: Resolver<ResolversTypes['UploadFilesPayload'], ParentType, ContextType, RequireFields<MutationUploadFilesArgs, 'input'>>;
 };
 
 export type QueryResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
@@ -226,14 +254,22 @@ export interface UploadScalarConfig extends GraphQLScalarTypeConfig<ResolversTyp
   name: 'Upload';
 }
 
+export type UploadFilesPayloadResolvers<ContextType = Context, ParentType extends ResolversParentTypes['UploadFilesPayload'] = ResolversParentTypes['UploadFilesPayload']> = {
+  files?: Resolver<Maybe<Array<ResolversTypes['FileInfo']>>, ParentType, ContextType>;
+  errors?: Resolver<Maybe<Array<ResolversTypes['FileExistError']>>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType>;
+};
+
 export type Resolvers<ContextType = Context> = {
   DateTime?: GraphQLScalarType;
   File?: FileResolvers<ContextType>;
+  FileExistError?: FileExistErrorResolvers<ContextType>;
   FileInfo?: FileInfoResolvers;
   Folder?: FolderResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   Upload?: GraphQLScalarType;
+  UploadFilesPayload?: UploadFilesPayloadResolvers<ContextType>;
 };
 
 
