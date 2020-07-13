@@ -69,18 +69,19 @@ export const uploadFile = async (
   name: string,
   stream: fs.ReadStream,
 ) => {
-  let fn = normalize(path.join(parentId, name));
+  let newId =path.join(parentId, name);
   let exist = false;
   try {
-    let stat = await loadFile(fn);
-    if (stat.kind === 'file') exist = true;
-  } catch {
+    await loadFile(newId);
+    exist = true;
+  } catch (_) {
     exist = false;
   }
-  if (exist) throw new Error('File exsisted ' + fn);
-  let wstream = fs.createWriteStream(fn);
+  console.info(exist);
+  if (exist) throw new Error('File exsisted ' + newId);
+  let wstream = fs.createWriteStream(normalize(newId));
   await new Promise((resolve, reject) =>
     stream.pipe(wstream).on('finish', resolve).on('error', reject),
   );
-  return { id: toId(fn) };
+  return { id: newId };
 };
