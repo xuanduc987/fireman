@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server';
 
 import { Context } from '../context';
-import { FileStat, uploadFiles } from '../fileApi';
+import { FileStat, uploadFiles, createFolder, removeFiles } from '../fileApi';
 import { Resolvers } from '../generated/graphql';
 
 export const typeDef = gql`
@@ -37,6 +37,11 @@ export const typeDef = gql`
     fileName: String!
   }
 
+  type FileNotFoundError {
+    message: String!
+    fileId: ID!
+  }
+
   input UploadFileInput {
     file: Upload!
     name: String!
@@ -52,8 +57,29 @@ export const typeDef = gql`
     errors: [FileExistError!]
   }
 
+  input CreateFolderInput {
+    parent: ID!
+    name: String!
+  }
+
+  type CreateFolderPayload {
+    folder: Folder
+    error: FileExistError
+  }
+
+  input RemoveFilesInput {
+    fileIds: [ID!]!
+  }
+
+  type RemoveFilesPayload {
+    removed: Int!
+    errors: [FileNotFoundError!]
+  }
+
   type Mutation {
     uploadFiles(input: UploadFilesInput!): UploadFilesPayload!
+    createFolder(input: CreateFolderInput!): CreateFolderPayload!
+    removeFiles(input: RemoveFilesInput!): RemoveFilesPayload!
   }
 `;
 
@@ -97,5 +123,11 @@ export const resolvers: Resolvers = {
       let { files, parent } = input
       return await uploadFiles(parent, files)
     },
+    createFolder: async (_, { input }) => {
+      return createFolder(input.parent, input.name)
+    },
+    removeFiles: async (_, { input }) => {
+      return removeFiles(input.fileIds)
+    }
   },
 };

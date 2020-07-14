@@ -1,6 +1,8 @@
 import fs from 'fs';
 import path from 'path';
-import { fileExistError } from './error';
+
+import { fileExistError, fileNotFoundError } from './error';
+
 const fsp = fs.promises;
 
 const PUBLIC = path.join(__dirname, '../public/files');
@@ -103,4 +105,43 @@ export const uploadFiles = async (
   );
 
   return { files: createds, errors: errors.length ? errors : null };
+};
+
+export const createFolder = async (parentId: string, name: string) => {
+  let newId = path.join(parentId, name);
+  let exist = true;
+  try {
+    await loadFile(newId);
+  } catch (_) {
+    exist = false;
+  }
+  if (exist) return { error: fileExistError(newId) };
+  await fsp.mkdir(normalize(newId));
+  return { folder: { id: newId } };
+};
+
+const removeFileRecur = async (fileId: string): Promise<[number, any[]]> => {
+  let result = [0, []] as [number, any[]];
+  try {
+    let stat = await loadFile(fileId);
+    let fn = normalize(fileId);
+    if (stat.kind === 'dir') {
+      let children = await fsp.readdir(fn);
+      let r = await Promise.all(
+        children.map((f) => removeFileRecur(path.join(fileId, f))),
+      );
+      result = r.reduce(([x, e1], [y, e2]) => [x + y, e1.concat(e2)]);
+    }
+    await fsp.unlink(fn);
+    return [result[0] + 1, result[1]];
+  } catch (_) {
+    return [result[0], result[1].concat(fileNotFoundError(fileId))];
+  }
+};
+
+export const removeFiles = async (fileIds: string[]) => {
+  let [removed, errors] = (
+    await Promise.all(fileIds.map(removeFileRecur))
+  ).reduce(([x, e1], [y, e2]) => [x + y, e1.concat(e2)]);
+  return { removed, errors: errors.length ? errors : null };
 };
