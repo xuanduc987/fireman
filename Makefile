@@ -1,7 +1,14 @@
 start: start-app start-srv
 
-start-%:
-	@echo "Start $* server"
-	(cd $*; yarn start &)
+stop-%:
+	@echo "Stop $* server"
+	-@xargs kill < logs/$*.pid
 
-.PHONY: start start-%
+start-%: logs stop-%
+	@echo "Start $* server"
+	cd $*; yarn start & echo "$$!" > "../logs/$*.pid"
+
+logs:
+	mkdir logs
+
+.PHONY: start start-% stop-%
