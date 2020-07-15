@@ -1,8 +1,10 @@
-import React, { useState, useRef } from 'react';
+import { useParams, useHistory } from 'react-router-dom';
+import React, { useRef, useMemo } from 'react';
+
 import { useLsQuery } from './generated/graphql';
 
-const formatSize = (size: undefined | number) => {
-  if (size === undefined) return '---';
+const formatSize = (size?: number | null) => {
+  if (size == undefined || size == null) return '---';
   if (size < 1024) return `${size}B`;
   if (size < 1024 * 1024) {
     let sizeInKB = Math.floor(size / 1024);
@@ -12,22 +14,25 @@ const formatSize = (size: undefined | number) => {
   return `${sizeInMB}MB`;
 };
 
+const isFolder = (f: {
+  __typename?: string | undefined;
+}): f is { __typename: 'Folder' } => f.__typename === 'Folder';
+
+const isFile = (f: {
+  __typename?: string | undefined;
+}): f is { __typename: 'File' } => f.__typename === 'File';
+
 function FileManager() {
-  const [workingDir, setWorkingdir] = useState('/');
-  const [history, setHistory] = useState([] as string[]);
+  let { id } = useParams();
+  let workingDir = useMemo(() => {
+    if (!id) return '/';
+    return atob(id);
+  }, [id]);
+
+  let history = useHistory();
 
   const move = (id: string) => {
-    let last = workingDir;
-    setWorkingdir(id);
-    setHistory(history.concat(last));
-  };
-
-  const moveBack = () => {
-    let last = history[history.length - 1];
-    if (!last) return;
-    let newHis = history.splice(0, history.length - 1);
-    setWorkingdir(last);
-    setHistory(newHis);
+    history.push('/' + btoa(id));
   };
 
   const [res] = useLsQuery({ variables: { dir: workingDir } });
@@ -52,13 +57,6 @@ function FileManager() {
   return (
     <div className="container mx-auto h-full">
       <div className="p-4 h-full">
-        <button
-          className="bg-gray-200 hover:bg-gray-300 py-2 px-4 rounded"
-          disabled={history.length === 0}
-          onClick={moveBack}
-        >
-          {'<'}
-        </button>
         <table className="table-auto w-full">
           <thead>
             <tr className="bg-gray-100">
@@ -67,7 +65,7 @@ function FileManager() {
             </tr>
           </thead>
           <tbody>
-            {children.map(({ id, name, size, __typename }: any) => (
+            {children.map((f) => (
               <tr
                 className="select-none cursor-pointer hover:bg-blue-100"
                 key={id}
@@ -75,13 +73,15 @@ function FileManager() {
                   let then = lastClick.current;
                   lastClick.current = Date.now();
                   if (lastClick.current - then > 300) return;
-                  if (__typename === 'Folder') {
-                    move(id);
+                  if (isFolder(f)) {
+                    move(f.id);
                   }
                 }}
               >
-                <td className="px-4 py-2 border">{name}</td>
-                <td className="px-4 py-2 border">{formatSize(size)}</td>
+                <td className="px-4 py-2 border">{f.name}</td>
+                <td className="px-4 py-2 border">
+                  {formatSize(isFile(f) ? f.size : null)}
+                </td>
               </tr>
             ))}
           </tbody>

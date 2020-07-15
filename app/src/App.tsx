@@ -14,7 +14,7 @@ function App({}: AppProps) {
     <Provider value={client}>
       <Router>
         <Switch>
-          <Route>
+          <Route path="/:id?">
             <FileManager />
           </Route>
         </Switch>
