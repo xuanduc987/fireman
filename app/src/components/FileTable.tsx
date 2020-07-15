@@ -1,5 +1,8 @@
+import SVG from 'react-inlinesvg';
 import { formatDistance } from 'date-fns';
 import React from 'react';
+import folder from 'heroicons/solid/folder.svg';
+import file from 'heroicons/outline/document.svg';
 
 import { FileInfo, Folder, isFile, isFolder } from '../types';
 
@@ -23,7 +26,7 @@ export function FileTable(props: FileTableProps) {
   let now = new Date();
 
   return (
-    <table className={'table-auto border w-full text-sm ' + className}>
+    <table className={'table-auto border w-full whitespace-no-wrap text-sm ' + className}>
       <thead>
         <tr className="bg-gray-100">
           <th className="px-4 py-2 border w-full">Name</th>
@@ -34,7 +37,7 @@ export function FileTable(props: FileTableProps) {
       <tbody>
         {files.map((f) => (
           <tr
-            className="select-none cursor-pointer hover:bg-blue-100 whitespace-no-wrap"
+            className="select-none cursor-pointer hover:bg-blue-100"
             key={f.id}
             onDoubleClick={() => {
               if (isFolder(f)) {
@@ -43,7 +46,13 @@ export function FileTable(props: FileTableProps) {
               console.log(f);
             }}
           >
-            <td className="px-4 py-2 border-t border-b">{f.name}</td>
+            <td className="px-4 py-2 border-t border-b">
+              <SVG
+                src={isFolder(f) ? folder : file}
+                className="inline-block h-5 mr-4"
+              />
+              {f.name}
+            </td>
             <td className="px-4 py-2 border-t border-b text-gray-500">
               {formatSize(isFile(f) ? f.size : null)}
             </td>
