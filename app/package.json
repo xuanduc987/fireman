@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "graphql": "^15.3.0",
+    "heroicons": "^0.3.6",
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
     "react-router-dom": "^5.2.0",
