@@ -6,8 +6,6 @@ import * as React from 'react';
 
 import FileManager from './FileManager';
 
-// import RsuiteDummy from './RsuiteDummy';
-
 const client = createClient({ url: 'http://localhost:5000' });
 interface AppProps {}
 
@@ -16,7 +14,6 @@ function App({}: AppProps) {
     <Provider value={client}>
       <Router>
         <Switch>
-          {/*<Route path="/rsuite"><RsuiteDummy/></Route>*/}
           <Route>
             <FileManager />
           </Route>
