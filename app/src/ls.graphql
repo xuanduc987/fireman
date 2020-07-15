@@ -1,0 +1,15 @@
+query Ls($dir: ID!){
+  fileById(id: $dir) {
+    id
+    name
+    ... on Folder {
+      children {
+        id
+        name
+        ... on File {
+          size
+        }
+      }
+    }
+  }
+}

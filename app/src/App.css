@@ -5,3 +5,9 @@ html, body, #root, .main {
 .status {
   padding: 8px;
 }
+
+@tailwind base;
+
+@tailwind components;
+
+@tailwind utilities;
