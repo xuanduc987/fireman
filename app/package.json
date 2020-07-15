@@ -10,6 +10,7 @@
     "build-storybook": "build-storybook"
   },
   "dependencies": {
+    "date-fns": "^2.14.0",
     "graphql": "^15.3.0",
     "heroicons": "^0.3.6",
     "react": "^16.13.0",

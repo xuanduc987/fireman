@@ -40,7 +40,7 @@ export type File = FileInfo & {
   modifiedTime: Scalars['DateTime'];
   name: Scalars['String'];
   path: Array<Folder>;
-  size?: Maybe<Scalars['Int']>;
+  size: Scalars['Int'];
 };
 
 export type FileExistError = {
@@ -270,7 +270,7 @@ export type FileResolvers<ContextType = Context, ParentType extends ResolversPar
   modifiedTime?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   path?: Resolver<Array<ResolversTypes['Folder']>, ParentType, ContextType>;
-  size?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  size?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType>;
 };
 

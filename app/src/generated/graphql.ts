@@ -121,7 +121,7 @@ export type File = FileInfo & {
   modifiedTime: Scalars['DateTime'];
   name: Scalars['String'];
   path: Array<Folder>;
-  size?: Maybe<Scalars['Int']>;
+  size: Scalars['Int'];
 };
 
 export enum CacheControlScope {
@@ -137,39 +137,70 @@ export type LsQueryVariables = Exact<{
 export type LsQuery = (
   { __typename?: 'Query' }
   & { fileById: (
-    { __typename?: 'Folder' }
+    { __typename: 'Folder' }
     & Pick<Folder, 'id' | 'name'>
-    & { children: Array<(
-      { __typename?: 'Folder' }
-      & Pick<Folder, 'id' | 'name'>
-    ) | (
-      { __typename?: 'File' }
-      & Pick<File, 'size' | 'id' | 'name'>
-    )> }
+    & CommonPart_Folder_Fragment
+    & FolderPartFragment
   ) | (
-    { __typename?: 'File' }
+    { __typename: 'File' }
     & Pick<File, 'id' | 'name'>
+    & CommonPart_File_Fragment
   ) }
 );
 
+type CommonPart_Folder_Fragment = (
+  { __typename: 'Folder' }
+  & Pick<Folder, 'id' | 'name' | 'modifiedTime'>
+);
 
-export const LsDocument = gql`
-    query Ls($dir: ID!) {
-  fileById(id: $dir) {
-    id
-    name
-    ... on Folder {
-      children {
-        id
-        name
-        ... on File {
-          size
-        }
-      }
-    }
+type CommonPart_File_Fragment = (
+  { __typename: 'File' }
+  & Pick<File, 'size' | 'id' | 'name' | 'modifiedTime'>
+);
+
+export type CommonPartFragment = CommonPart_Folder_Fragment | CommonPart_File_Fragment;
+
+export type FolderPartFragment = (
+  { __typename?: 'Folder' }
+  & { children: Array<(
+    { __typename?: 'Folder' }
+    & CommonPart_Folder_Fragment
+  ) | (
+    { __typename?: 'File' }
+    & CommonPart_File_Fragment
+  )> }
+);
+
+export const CommonPartFragmentDoc = gql`
+    fragment CommonPart on FileInfo {
+  __typename
+  id
+  name
+  modifiedTime
+  ... on File {
+    size
   }
 }
     `;
+export const FolderPartFragmentDoc = gql`
+    fragment FolderPart on Folder {
+  children {
+    ...CommonPart
+  }
+}
+    ${CommonPartFragmentDoc}`;
+export const LsDocument = gql`
+    query Ls($dir: ID!) {
+  fileById(id: $dir) {
+    __typename
+    id
+    name
+    ...CommonPart
+    ...FolderPart
+  }
+}
+    ${CommonPartFragmentDoc}
+${FolderPartFragmentDoc}`;
 
 export function useLsQuery(options: Omit<Urql.UseQueryArgs<LsQueryVariables>, 'query'> = {}) {
   return Urql.useQuery<LsQuery>({ query: LsDocument, ...options });

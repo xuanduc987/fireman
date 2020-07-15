@@ -1,15 +1,26 @@
 query Ls($dir: ID!){
   fileById(id: $dir) {
+    __typename
     id
     name
-    ... on Folder {
-      children {
-        id
-        name
-        ... on File {
-          size
-        }
-      }
-    }
+    ...CommonPart
+    ...FolderPart
   }
 }
+
+fragment CommonPart on FileInfo {
+  __typename
+  id
+  name
+  modifiedTime
+  ... on File {
+    size
+  }
+}
+
+fragment FolderPart on Folder {
+  children {
+    ...CommonPart
+  }
+}
+

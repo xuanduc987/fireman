@@ -17,7 +17,7 @@ export const typeDef = gql`
     modifiedTime: DateTime!
     name: String!
     path: [Folder!]!
-    size: Int
+    size: Int!
   }
 
   type Folder implements FileInfo {
