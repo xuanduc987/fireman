@@ -6,6 +6,10 @@ export const FileFragment = gql`
     id
     name
     modifiedTime
+    path {
+      id
+      name
+    }
     ... on File {
       size
     }

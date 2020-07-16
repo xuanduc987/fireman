@@ -7,6 +7,7 @@ import { useListQuery, useUploadMutation } from './generated/graphql';
 import { FileTable } from './components/FileTable';
 import { isFolder } from './types';
 import { useDocTitle } from './hooks';
+import { Toolbar } from './components/Toolbar';
 
 type UploadState = 'uploading' | 'fail' | 'done';
 
@@ -33,7 +34,8 @@ function FileManager() {
   let history = useHistory();
 
   let move = (id: string) => {
-    history.push('/' + btoa(id));
+    if (id == '/') history.push('/');
+    else history.push('/' + btoa(id));
   };
 
   let [list, execList] = useListQuery({ variables: { dir: workingDir } });
@@ -104,9 +106,21 @@ function FileManager() {
 
   return (
     <div {...getRootProps()} className="container mx-auto h-full">
-      <div className="p-4 h-full">
-        <div className="w-full relative">
-          <FileTable folder={f} onFolderDoubleClick={move} />
+      <div className="px-4 pt-4 h-full flex flex-col">
+        <Toolbar
+          buttons={['del', 'addFolder']}
+          breadCrumbItems={f.path
+            .concat(f)
+            .map((f) => ({ key: f.id, name: f.name }))}
+          onBreadCrumbItemClick={move}
+        />
+
+        <div className="w-full flex-1 min-h-0 overflow-y-scroll relative">
+          <FileTable
+            className="border-t-0"
+            folder={f}
+            onFolderDoubleClick={move}
+          />
           {isDragActive && <DropfileOverlay />}
         </div>
       </div>

@@ -2,6 +2,7 @@ type FileCommon = {
   id: string;
   name: string;
   modifiedTime: string,
+  path: Array<{id: string, name: string}>
 };
 
 export type Folder = FileCommon & {

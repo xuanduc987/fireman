@@ -179,11 +179,19 @@ export type UploadMutation = (
 type FileFragment_Folder_Fragment = (
   { __typename: 'Folder' }
   & Pick<Folder, 'id' | 'name' | 'modifiedTime'>
+  & { path: Array<(
+    { __typename?: 'Folder' }
+    & Pick<Folder, 'id' | 'name'>
+  )> }
 );
 
 type FileFragment_File_Fragment = (
   { __typename: 'File' }
   & Pick<File, 'size' | 'id' | 'name' | 'modifiedTime'>
+  & { path: Array<(
+    { __typename?: 'Folder' }
+    & Pick<Folder, 'id' | 'name'>
+  )> }
 );
 
 export type FileFragmentFragment = FileFragment_Folder_Fragment | FileFragment_File_Fragment;
@@ -194,6 +202,10 @@ export const FileFragmentFragmentDoc = gql`
   id
   name
   modifiedTime
+  path {
+    id
+    name
+  }
   ... on File {
     size
   }

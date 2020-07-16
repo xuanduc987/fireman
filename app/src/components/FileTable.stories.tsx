@@ -13,7 +13,8 @@ let folder = (name: string, children: FileInfo[] = []) => ({
   id: name,
   name,
   children,
-  modifiedTime: Date()
+  modifiedTime: Date(),
+  path: [],
 });
 
 let file = (name: string) => ({
@@ -21,7 +22,8 @@ let file = (name: string) => ({
   id: name,
   name,
   size: Math.random() * 10_000_000,
-  modifiedTime: Date()
+  modifiedTime: Date(),
+  path: [],
 });
 
 let dummyFolder = folder('dummy', [
@@ -36,5 +38,5 @@ const Template = (args: FileTableProps) => <FileTable {...args} />;
 
 export const Basic: { args: FileTableProps } = Template.bind({}) as any;
 Basic.args = {
-  folder: dummyFolder
+  folder: dummyFolder,
 };

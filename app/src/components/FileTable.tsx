@@ -27,10 +27,10 @@ export function FileTable(props: FileTableProps) {
   return (
     <table className={'table-auto border w-full whitespace-no-wrap text-sm ' + className}>
       <thead>
-        <tr className="bg-gray-100">
-          <th className="px-4 py-2 border w-full">Name</th>
-          <th className="px-4 py-2 border">Size</th>
-          <th className="px-4 py-2 border">Last Modified</th>
+        <tr className="bg-gray-100 border-b">
+          <th className="px-4 py-2 border-l border-r w-full">Name</th>
+          <th className="px-4 py-2 border-l border-r">Size</th>
+          <th className="px-4 py-2 border-l border-r">Last Modified</th>
         </tr>
       </thead>
       <tbody>
