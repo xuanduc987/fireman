@@ -1,12 +1,11 @@
-import SVG from 'react-inlinesvg';
 import { formatDistance } from 'date-fns';
 import React from 'react';
-import folder from 'heroicons/solid/folder.svg';
+import SVG from 'react-inlinesvg';
 import file from 'heroicons/outline/document.svg';
+import folder from 'heroicons/solid/folder.svg';
 
 import { FileInfo, Folder, isFile, isFolder } from '../types';
-
-const noop = (_: any) => {};
+import { noop } from '../utils';
 
 export type FileTableProps = {
   folder: Folder;

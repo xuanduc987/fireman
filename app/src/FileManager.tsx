@@ -1,8 +1,9 @@
 import { useParams, useHistory } from 'react-router-dom';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { FileTable } from './components/FileTable';
 import { isFolder } from './types';
+import { useDocTitle } from './hooks';
 import { useLsQuery } from './generated/graphql';
 
 function FileManager() {
@@ -26,6 +27,7 @@ function FileManager() {
   };
 
   const [res] = useLsQuery({ variables: { dir: workingDir } });
+  useDocTitle(res.data?.fileById?.name || 'Unknown folder');
 
   if (res.fetching || !res.data) return <p>Loading...</p>;
   if (res.error) return <p>Errored!</p>;

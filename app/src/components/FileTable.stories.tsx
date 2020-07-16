@@ -13,6 +13,7 @@ let folder = (name: string, children: FileInfo[] = []) => ({
   id: name,
   name,
   children,
+  modifiedTime: Date()
 });
 
 let file = (name: string) => ({
@@ -20,6 +21,7 @@ let file = (name: string) => ({
   id: name,
   name,
   size: Math.random() * 10_000_000,
+  modifiedTime: Date()
 });
 
 let dummyFolder = folder('dummy', [
