@@ -3322,11 +3322,20 @@
   dependencies:
     "@types/yargs-parser" "*"
 
-"@urql/core@^1.12.0":
+"@urql/core@>=1.12.0", "@urql/core@^1.12.0":
   version "1.12.2"
   resolved "https://registry.yarnpkg.com/@urql/core/-/core-1.12.2.tgz#88c031dc0e39da412964b05ae8e89c634fca0220"
   integrity sha512-GGG9fzDRscuLdYVpJSTOfTPLHHEXadrUI/LNZ0vAIXrof5whWL8Nyxc2x2EhilrajZ+7DgZUuT+nuiVF4/Z7fA==
   dependencies:
+    wonka "^4.0.14"
+
+"@urql/exchange-multipart-fetch@^0.1.8":
+  version "0.1.8"
+  resolved "https://registry.yarnpkg.com/@urql/exchange-multipart-fetch/-/exchange-multipart-fetch-0.1.8.tgz#b74a3c2966441e121eaad6b9e53f367daaf2d884"
+  integrity sha512-GiU8mUcggzuARPyECErgitA7OYydXGWqgv37h405JgkvLaLGVL4jczxDVSx/nGSMVLi6Kd5+7ZiZs6DBtc3Fsw==
+  dependencies:
+    "@urql/core" ">=1.12.0"
+    extract-files "^8.1.0"
     wonka "^4.0.14"
 
 "@webassemblyjs/ast@1.9.0":
@@ -3956,6 +3965,11 @@ atob@^2.1.2:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/atob/-/atob-2.1.2.tgz#6d9517eb9e030d2436666651e86bd9f6f13533c9"
   integrity sha512-Wm6ukoaOGJi/73p/cl2GvLjTI5JM1k/O14isD73YML8StrH/7/lRFgmg8nICZgD3bZZvjwCGxtMOD3wWNAu8cg==
+
+attr-accept@^2.0.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/attr-accept/-/attr-accept-2.1.0.tgz#a231a854385d36ff7a99647bb77b33c8a5175aee"
+  integrity sha512-sLzVM3zCCmmDtDNhI0i96k6PUztkotSOXqE4kDGQt/6iDi5M+H0srjeF+QC6jN581l4X/Zq3Zu/tgcErEssavg==
 
 auto-bind@~4.0.0:
   version "4.0.0"
@@ -6695,6 +6709,11 @@ extglob@^2.0.4:
     snapdragon "^0.8.1"
     to-regex "^3.0.1"
 
+extract-files@^8.1.0:
+  version "8.1.0"
+  resolved "https://registry.yarnpkg.com/extract-files/-/extract-files-8.1.0.tgz#46a0690d0fe77411a2e3804852adeaa65cd59288"
+  integrity sha512-PTGtfthZK79WUMk+avLmwx3NGdU8+iVFXC2NMGxKsn0MnihOG2lvumj+AZo8CTwTrwjXDgZ5tztbRlEdRjBonQ==
+
 extsprintf@1.3.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/extsprintf/-/extsprintf-1.3.0.tgz#96918440e3041a7a414f8c52e3c574eb3c3e1e05"
@@ -6833,6 +6852,13 @@ file-loader@^6.0.0:
   dependencies:
     loader-utils "^2.0.0"
     schema-utils "^2.6.5"
+
+file-selector@^0.1.12:
+  version "0.1.12"
+  resolved "https://registry.yarnpkg.com/file-selector/-/file-selector-0.1.12.tgz#fe726547be219a787a9dcc640575a04a032b1fd0"
+  integrity sha512-Kx7RTzxyQipHuiqyZGf+Nz4vY9R1XGxuQl/hLoJwq+J4avk/9wxxgZyHKtbyIPJmbD4A66DWGYfyykWNpcYutQ==
+  dependencies:
+    tslib "^1.9.0"
 
 file-system-cache@^1.0.5:
   version "1.0.5"
@@ -11494,6 +11520,15 @@ react-draggable@^4.0.3:
   dependencies:
     classnames "^2.2.5"
     prop-types "^15.6.0"
+
+react-dropzone@^11.0.2:
+  version "11.0.2"
+  resolved "https://registry.yarnpkg.com/react-dropzone/-/react-dropzone-11.0.2.tgz#1a4084f520c2eafbeb24026760b3ee8f3759cfd3"
+  integrity sha512-/Wde9Il1aJ1FtWllg3N2taIeJh4aftx6UGUG8R1TmLnZit2RnDcEjcKwEEbKwgLXTTh8QQpiZWQJq45jTy1jCA==
+  dependencies:
+    attr-accept "^2.0.0"
+    file-selector "^0.1.12"
+    prop-types "^15.7.2"
 
 react-element-to-jsx-string@^14.3.1:
   version "14.3.1"

@@ -129,50 +129,67 @@ export enum CacheControlScope {
   Private = 'PRIVATE'
 }
 
-export type LsQueryVariables = Exact<{
+export type ListQueryVariables = Exact<{
   dir: Scalars['ID'];
 }>;
 
 
-export type LsQuery = (
+export type ListQuery = (
   { __typename?: 'Query' }
   & { fileById: (
     { __typename: 'Folder' }
     & Pick<Folder, 'id' | 'name'>
-    & CommonPart_Folder_Fragment
-    & FolderPartFragment
+    & { children: Array<(
+      { __typename?: 'Folder' }
+      & FileFragment_Folder_Fragment
+    ) | (
+      { __typename?: 'File' }
+      & FileFragment_File_Fragment
+    )> }
+    & FileFragment_Folder_Fragment
   ) | (
     { __typename: 'File' }
     & Pick<File, 'id' | 'name'>
-    & CommonPart_File_Fragment
+    & FileFragment_File_Fragment
   ) }
 );
 
-type CommonPart_Folder_Fragment = (
+export type UploadMutationVariables = Exact<{
+  input: UploadFilesInput;
+}>;
+
+
+export type UploadMutation = (
+  { __typename?: 'Mutation' }
+  & { uploadFiles: (
+    { __typename?: 'UploadFilesPayload' }
+    & { files?: Maybe<Array<(
+      { __typename?: 'Folder' }
+      & FileFragment_Folder_Fragment
+    ) | (
+      { __typename?: 'File' }
+      & FileFragment_File_Fragment
+    )>>, errors?: Maybe<Array<(
+      { __typename?: 'FileExistError' }
+      & Pick<FileExistError, 'fileName' | 'message'>
+    )>> }
+  ) }
+);
+
+type FileFragment_Folder_Fragment = (
   { __typename: 'Folder' }
   & Pick<Folder, 'id' | 'name' | 'modifiedTime'>
 );
 
-type CommonPart_File_Fragment = (
+type FileFragment_File_Fragment = (
   { __typename: 'File' }
   & Pick<File, 'size' | 'id' | 'name' | 'modifiedTime'>
 );
 
-export type CommonPartFragment = CommonPart_Folder_Fragment | CommonPart_File_Fragment;
+export type FileFragmentFragment = FileFragment_Folder_Fragment | FileFragment_File_Fragment;
 
-export type FolderPartFragment = (
-  { __typename?: 'Folder' }
-  & { children: Array<(
-    { __typename?: 'Folder' }
-    & CommonPart_Folder_Fragment
-  ) | (
-    { __typename?: 'File' }
-    & CommonPart_File_Fragment
-  )> }
-);
-
-export const CommonPartFragmentDoc = gql`
-    fragment CommonPart on FileInfo {
+export const FileFragmentFragmentDoc = gql`
+    fragment FileFragment on FileInfo {
   __typename
   id
   name
@@ -182,26 +199,39 @@ export const CommonPartFragmentDoc = gql`
   }
 }
     `;
-export const FolderPartFragmentDoc = gql`
-    fragment FolderPart on Folder {
-  children {
-    ...CommonPart
-  }
-}
-    ${CommonPartFragmentDoc}`;
-export const LsDocument = gql`
-    query Ls($dir: ID!) {
+export const ListDocument = gql`
+    query List($dir: ID!) {
   fileById(id: $dir) {
     __typename
     id
     name
-    ...CommonPart
-    ...FolderPart
+    ...FileFragment
+    ... on Folder {
+      children {
+        ...FileFragment
+      }
+    }
   }
 }
-    ${CommonPartFragmentDoc}
-${FolderPartFragmentDoc}`;
+    ${FileFragmentFragmentDoc}`;
 
-export function useLsQuery(options: Omit<Urql.UseQueryArgs<LsQueryVariables>, 'query'> = {}) {
-  return Urql.useQuery<LsQuery>({ query: LsDocument, ...options });
+export function useListQuery(options: Omit<Urql.UseQueryArgs<ListQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<ListQuery>({ query: ListDocument, ...options });
+};
+export const UploadDocument = gql`
+    mutation Upload($input: UploadFilesInput!) {
+  uploadFiles(input: $input) {
+    files {
+      ...FileFragment
+    }
+    errors {
+      fileName
+      message
+    }
+  }
+}
+    ${FileFragmentFragmentDoc}`;
+
+export function useUploadMutation() {
+  return Urql.useMutation<UploadMutation, UploadMutationVariables>(UploadDocument);
 };

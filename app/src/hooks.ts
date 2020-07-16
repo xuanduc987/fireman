@@ -9,3 +9,11 @@ export const useDocTitle = (title: string) => {
     };
   }, [title]);
 };
+
+export const useMounted = () => {
+  let mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = false;
+  });
+  return mounted;
+};

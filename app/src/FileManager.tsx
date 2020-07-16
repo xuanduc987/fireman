@@ -1,10 +1,20 @@
+import { useDropzone } from 'react-dropzone';
 import { useParams, useHistory } from 'react-router-dom';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { DropfileOverlay } from './components/DropfileOverlay';
+import { useListQuery, useUploadMutation } from './generated/graphql';
 import { FileTable } from './components/FileTable';
 import { isFolder } from './types';
 import { useDocTitle } from './hooks';
-import { useLsQuery } from './generated/graphql';
+
+type UploadState = 'uploading' | 'fail' | 'done';
+
+const mark = (files: { name: string }[], state: UploadState) =>
+  files.reduce((acc: Record<string, UploadState>, f) => {
+    acc[f.name] = state;
+    return acc;
+  }, {});
 
 function FileManager() {
   let { id } = useParams();
@@ -22,23 +32,83 @@ function FileManager() {
 
   let history = useHistory();
 
-  const move = (id: string) => {
+  let move = (id: string) => {
     history.push('/' + btoa(id));
   };
 
-  const [res] = useLsQuery({ variables: { dir: workingDir } });
-  useDocTitle(res.data?.fileById?.name || 'Unknown folder');
+  let [list, execList] = useListQuery({ variables: { dir: workingDir } });
+  useDocTitle(list.data?.fileById?.name || 'Unknown folder');
 
-  if (res.fetching || !res.data) return <p>Loading...</p>;
-  if (res.error) return <p>Errored!</p>;
+  let [, uploadFiles] = useUploadMutation();
 
-  let f = res.data.fileById;
+  let [uploading, setUploading] = useState<Record<string, UploadState>>({});
+
+  let onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      let toUploads = acceptedFiles.filter(
+        (f) => uploading[f.name] != 'uploading',
+      );
+      if (!toUploads.length) return;
+
+      setUploading({
+        ...uploading,
+        ...mark(toUploads, 'uploading'),
+      });
+
+      uploadFiles({
+        input: {
+          parent: workingDir,
+          files: toUploads.map((f) => ({
+            name: f.name,
+            file: f,
+          })),
+        },
+      })
+        .then(({ data }) => {
+          let errors: Array<{ name: string }> = [];
+          let files: Array<{ name: string }> = [];
+          if (!data) {
+            errors = toUploads;
+          } else {
+            files = data.uploadFiles.files || [];
+            errors = (data.uploadFiles.errors || []).map((f) => ({
+              name: f.fileName,
+            }));
+          }
+          setUploading((uploading) => ({
+            ...uploading,
+            ...mark(files, 'done'),
+            ...mark(errors, 'fail'),
+          }));
+        })
+        .finally(execList);
+    },
+    [uploading],
+  );
+
+  useEffect(() => {
+    console.table(uploading);
+  }, [uploading]);
+
+  let { getRootProps, isDragActive } = useDropzone({
+    onDrop,
+    noClick: true,
+    noKeyboard: true,
+  });
+
+  if (list.fetching || !list.data) return <p>Loading...</p>;
+  if (list.error) return <p>Errored!</p>;
+
+  let f = list.data.fileById;
   if (!isFolder(f)) return <p>Errored!</p>;
 
   return (
-    <div className="container mx-auto h-full">
+    <div {...getRootProps()} className="container mx-auto h-full">
       <div className="p-4 h-full">
-        <FileTable folder={f} onFolderDoubleClick={move} />
+        <div className="w-full relative">
+          <FileTable folder={f} onFolderDoubleClick={move} />
+          {isDragActive && <DropfileOverlay />}
+        </div>
       </div>
     </div>
   );

@@ -95,10 +95,17 @@ export const uploadFiles = async (
   let createds = await Promise.all(
     toCreates.map(async (f) => {
       let newId = path.join(parentId, f.name);
-      let wstream = fs.createWriteStream(normalize(newId));
+      let newFn = normalize(newId);
       let rstream = (await f.file).createReadStream();
+      let wstream = fs.createWriteStream(newFn);
       await new Promise((resolve, reject) =>
-        rstream.pipe(wstream).on('finish', resolve).on('error', reject),
+        rstream
+          .pipe(wstream)
+          .on('finish', resolve)
+          .on('error', (e) => {
+            reject(e);
+            fs.unlinkSync(newFn);
+          }),
       );
       return { id: newId };
     }),

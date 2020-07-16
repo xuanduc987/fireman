@@ -1,12 +1,16 @@
 import './App.css';
 
+import { Provider, cacheExchange, createClient, dedupExchange } from 'urql';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
-import { createClient, Provider } from 'urql';
+import { multipartFetchExchange } from '@urql/exchange-multipart-fetch';
 import * as React from 'react';
 
 import FileManager from './FileManager';
 
-const client = createClient({ url: 'http://localhost:5000' });
+const client = createClient({
+  url: 'http://localhost:5000',
+  exchanges: [dedupExchange, cacheExchange, multipartFetchExchange],
+});
 interface AppProps {}
 
 function App({}: AppProps) {
