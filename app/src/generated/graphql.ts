@@ -129,6 +129,25 @@ export enum CacheControlScope {
   Private = 'PRIVATE'
 }
 
+export type CreateFolderMutationVariables = Exact<{
+  input: CreateFolderInput;
+}>;
+
+
+export type CreateFolderMutation = (
+  { __typename?: 'Mutation' }
+  & { createFolder: (
+    { __typename?: 'CreateFolderPayload' }
+    & { folder?: Maybe<(
+      { __typename?: 'Folder' }
+      & FileFragment_Folder_Fragment
+    )>, error?: Maybe<(
+      { __typename?: 'FileExistError' }
+      & Pick<FileExistError, 'message' | 'fileName'>
+    )> }
+  ) }
+);
+
 export type ListQueryVariables = Exact<{
   dir: Scalars['ID'];
 }>;
@@ -211,6 +230,23 @@ export const FileFragmentFragmentDoc = gql`
   }
 }
     `;
+export const CreateFolderDocument = gql`
+    mutation CreateFolder($input: CreateFolderInput!) {
+  createFolder(input: $input) {
+    folder {
+      ...FileFragment
+    }
+    error {
+      message
+      fileName
+    }
+  }
+}
+    ${FileFragmentFragmentDoc}`;
+
+export function useCreateFolderMutation() {
+  return Urql.useMutation<CreateFolderMutation, CreateFolderMutationVariables>(CreateFolderDocument);
+};
 export const ListDocument = gql`
     query List($dir: ID!) {
   fileById(id: $dir) {

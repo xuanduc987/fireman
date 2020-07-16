@@ -3,11 +3,16 @@ import { useParams, useHistory } from 'react-router-dom';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { DropfileOverlay } from './components/DropfileOverlay';
-import { useListQuery, useUploadMutation } from './generated/graphql';
+import {
+  useListQuery,
+  useUploadMutation,
+  useCreateFolderMutation,
+} from './generated/graphql';
 import { FileTable } from './components/FileTable';
 import { isFolder } from './types';
 import { useDocTitle } from './hooks';
 import { Toolbar } from './components/Toolbar';
+import { CreateFolderModal } from './components/CreateFolderModal';
 
 type UploadState = 'uploading' | 'fail' | 'done';
 
@@ -98,6 +103,10 @@ function FileManager() {
     noKeyboard: true,
   });
 
+  let [newFolderModalOpen, setNewfolderModalOpen] = useState(false);
+
+  let [, createFolder] = useCreateFolderMutation();
+
   if (list.fetching || !list.data) return <p>Loading...</p>;
   if (list.error) return <p>Errored!</p>;
 
@@ -113,6 +122,9 @@ function FileManager() {
             .concat(f)
             .map((f) => ({ key: f.id, name: f.name }))}
           onBreadCrumbItemClick={move}
+          onButtonClick={(type) => {
+            if (type === 'addFolder') setNewfolderModalOpen(true);
+          }}
         />
 
         <div className="w-full flex-1 min-h-0 overflow-y-scroll relative">
@@ -124,6 +136,19 @@ function FileManager() {
           {isDragActive && <DropfileOverlay />}
         </div>
       </div>
+
+      <CreateFolderModal
+        isOpen={newFolderModalOpen}
+        onRequestClose={() => setNewfolderModalOpen(false)}
+        onCreate={(name) => {
+          createFolder({
+            input: {
+              parent: workingDir,
+              name,
+            },
+          }).finally(execList);
+        }}
+      />
     </div>
   );
 }
