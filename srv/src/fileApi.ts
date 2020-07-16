@@ -22,16 +22,17 @@ export const getPaths = (p: string) => {
   let rel = path.relative(PUBLIC, p);
   // rel empty => root
   if (!rel) return [];
-  let [ps] = path
-    .dirname(rel)
-    .split(path.sep)
-    .reduce(
-      ([acc, current], dir) => {
-        let p = path.join(current, dir);
-        return [acc.concat(p), p];
-      },
-      [[] as string[], '/'],
-    );
+
+  let parent = path.dirname(rel);
+  if (parent == '.') return ['/'];
+
+  let [ps] = parent.split(path.sep).reduce(
+    ([acc, current], dir) => {
+      let p = path.join(current, dir);
+      return [acc.concat(p), p];
+    },
+    [['/'], ''],
+  );
   return ps;
 };
 
