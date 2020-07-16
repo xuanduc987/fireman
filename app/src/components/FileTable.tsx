@@ -42,7 +42,6 @@ export function FileTable(props: FileTableProps) {
               if (isFolder(f)) {
                 onFolderDoubleClick(f.id);
               }
-              console.log(f);
             }}
           >
             <td className="px-4 py-2 border-t border-b">
@@ -67,15 +66,19 @@ export function FileTable(props: FileTableProps) {
   );
 }
 
+const round = (n: number): number => {
+  return Math.round(n * 10)/10
+}
+
 const formatSize = (size?: number | null) => {
   if (size == undefined || size == null) return '---';
   if (size < 1024) return `${size} bytes`;
   if (size < 1024 * 1024) {
-    let sizeInKB = Math.floor(size / 1024);
-    return `${sizeInKB} Kb`;
+    let sizeInKB = round(size / 1024);
+    return `${sizeInKB} KB`;
   }
-  let sizeInMB = Math.floor(size / 1024 / 1024);
-  return `${sizeInMB} Mb`;
+  let sizeInMB = round(size / 1024 / 1024);
+  return `${sizeInMB} MB`;
 };
 
 const defaultSort = (files: FileInfo[]) => {
