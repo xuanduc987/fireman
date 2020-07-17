@@ -10,4 +10,14 @@ html, body, #root, .main {
 
 @tailwind components;
 
+.react-contextmenu {
+  @apply bg-white rounded-md border py-1
+}
+.react-contextmenu-item {
+  @apply py-1 pl-5 pr-6 cursor-pointer text-sm
+}
+.react-contextmenu-item:hover {
+  @apply bg-blue-100
+}
+
 @tailwind utilities;

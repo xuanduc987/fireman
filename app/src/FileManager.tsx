@@ -1,3 +1,4 @@
+import { ContextMenu, MenuItem } from 'react-contextmenu';
 import { useDropzone } from 'react-dropzone';
 import { useParams, useHistory } from 'react-router-dom';
 import React, {
@@ -7,19 +8,24 @@ import React, {
   useState,
   useRef,
 } from 'react';
+import SVG from 'react-inlinesvg';
+import pencil from 'heroicons/solid/pencil.svg';
+import trash from 'heroicons/solid/trash.svg';
 
 import { CreateFolderModal } from './components/CreateFolderModal';
 import { DropfileOverlay } from './components/DropfileOverlay';
 import { FileTable } from './components/FileTable';
+import { RenameModal } from './components/RenameModal';
 import { Toolbar } from './components/Toolbar';
 import { isFolder } from './types';
-import { useDocTitle } from './hooks';
 import {
-  useListQuery,
-  useUploadMutation,
   useCreateFolderMutation,
+  useListQuery,
   useRemoveFilesMutation,
+  useUploadMutation,
+  useRenameMutation,
 } from './generated/graphql';
+import { useDocTitle } from './hooks';
 
 type UploadState = 'uploading' | 'fail' | 'done';
 
@@ -118,6 +124,40 @@ function FileManager() {
 
   let [, createFolder] = useCreateFolderMutation();
   let [, removeFiles] = useRemoveFilesMutation();
+  let [, renameFile] = useRenameMutation();
+
+  let remove = (id: string) => {
+    removeFiles(
+      {
+        input: {
+          fileIds: [id],
+        },
+      },
+      { additionalTypenames: ['File', 'Folder'] },
+    ).finally(() => {
+      setSelected(null);
+      execList();
+    });
+  };
+
+  let [oldName, setOldname] = useState('');
+  let [renameModalOpen, setRenameModalOpen] = useState(false);
+
+  let rename = (fileId: string, name: string) => {
+    if (name == oldName) return;
+    renameFile(
+      {
+        input: {
+          fileId,
+          name,
+        },
+      },
+      { additionalTypenames: ['File', 'Folder'] },
+    ).finally(() => {
+      setSelected(null);
+      execList();
+    });
+  };
 
   if (list.fetching || !list.data) return <p>Loading...</p>;
   if (list.error) return <p>Errored!</p>;
@@ -156,17 +196,7 @@ function FileManager() {
             }
             if (type === 'del') {
               if (!selected) return;
-              removeFiles(
-                {
-                  input: {
-                    fileIds: [selected],
-                  },
-                },
-                { additionalTypenames: ['File', 'Folder'] },
-              ).finally(() => {
-                setSelected(null);
-                execList();
-              });
+              remove(selected);
             }
           }}
         />
@@ -180,6 +210,7 @@ function FileManager() {
               setSelected((selected) => (selected === id ? null : id));
             }}
             selected={selected}
+            contextMenuId="file-context-menu"
           />
           {isDragActive && <DropfileOverlay />}
         </div>
@@ -197,6 +228,41 @@ function FileManager() {
           }).finally(execList);
         }}
       />
+
+      <RenameModal
+        isOpen={renameModalOpen}
+        name={oldName}
+        onRequestClose={() => setRenameModalOpen(false)}
+        onRename={(name) => {
+          if (!selected) return;
+          rename(selected, name);
+        }}
+      />
+      <ContextMenu
+        id="file-context-menu"
+        onShow={(e) => {
+          setSelected(e.detail.data.id);
+        }}
+      >
+        <MenuItem
+          onClick={(_, prop: { name: string }) => {
+            setOldname(prop.name);
+            setRenameModalOpen(true);
+          }}
+        >
+          <SVG src={pencil} className="inline-block h-4 mr-2" />
+          <span>Rename</span>
+        </MenuItem>
+
+        <MenuItem
+          onClick={(_, prop: { id: string }) => {
+            remove(prop.id);
+          }}
+        >
+          <SVG src={trash} className="inline-block h-4 mr-2" />
+          <span>Delete</span>
+        </MenuItem>
+      </ContextMenu>
     </div>
   );
 }

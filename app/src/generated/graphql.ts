@@ -48,6 +48,7 @@ export type Mutation = {
   uploadFiles: UploadFilesPayload;
   createFolder: CreateFolderPayload;
   removeFiles: RemoveFilesPayload;
+  renameFile: RenameFilePayload;
 };
 
 
@@ -63,6 +64,11 @@ export type MutationCreateFolderArgs = {
 
 export type MutationRemoveFilesArgs = {
   input: RemoveFilesInput;
+};
+
+
+export type MutationRenameFileArgs = {
+  input: RenameFileInput;
 };
 
 export type UploadFilesInput = {
@@ -114,6 +120,19 @@ export type FileNotFoundError = {
   message: Scalars['String'];
   fileId: Scalars['ID'];
 };
+
+export type RenameFileInput = {
+  fileId: Scalars['ID'];
+  name: Scalars['String'];
+};
+
+export type RenameFilePayload = {
+  __typename?: 'RenameFilePayload';
+  file?: Maybe<FileInfo>;
+  error?: Maybe<FileError>;
+};
+
+export type FileError = FileNotFoundError | FileExistError;
 
 export type File = FileInfo & {
   __typename?: 'File';
@@ -187,6 +206,31 @@ export type RemoveFilesMutation = (
       { __typename?: 'FileNotFoundError' }
       & Pick<FileNotFoundError, 'message' | 'fileId'>
     )>> }
+  ) }
+);
+
+export type RenameMutationVariables = Exact<{
+  input: RenameFileInput;
+}>;
+
+
+export type RenameMutation = (
+  { __typename?: 'Mutation' }
+  & { renameFile: (
+    { __typename?: 'RenameFilePayload' }
+    & { file?: Maybe<(
+      { __typename?: 'Folder' }
+      & FileFragment_Folder_Fragment
+    ) | (
+      { __typename?: 'File' }
+      & FileFragment_File_Fragment
+    )>, error?: Maybe<(
+      { __typename: 'FileNotFoundError' }
+      & Pick<FileNotFoundError, 'message' | 'fileId'>
+    ) | (
+      { __typename: 'FileExistError' }
+      & Pick<FileExistError, 'message' | 'fileName'>
+    )> }
   ) }
 );
 
@@ -297,6 +341,31 @@ export const RemoveFilesDocument = gql`
 
 export function useRemoveFilesMutation() {
   return Urql.useMutation<RemoveFilesMutation, RemoveFilesMutationVariables>(RemoveFilesDocument);
+};
+export const RenameDocument = gql`
+    mutation Rename($input: RenameFileInput!) {
+  renameFile(input: $input) {
+    file {
+      ...FileFragment
+    }
+    error {
+      ... on FileExistError {
+        __typename
+        message
+        fileName
+      }
+      ... on FileNotFoundError {
+        __typename
+        message
+        fileId
+      }
+    }
+  }
+}
+    ${FileFragmentFragmentDoc}`;
+
+export function useRenameMutation() {
+  return Urql.useMutation<RenameMutation, RenameMutationVariables>(RenameDocument);
 };
 export const UploadDocument = gql`
     mutation Upload($input: UploadFilesInput!) {

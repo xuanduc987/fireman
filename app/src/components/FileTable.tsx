@@ -1,3 +1,4 @@
+import { ContextMenuTrigger } from 'react-contextmenu';
 import { formatDistance } from 'date-fns';
 import React from 'react';
 import SVG from 'react-inlinesvg';
@@ -13,6 +14,7 @@ export type FileTableProps = {
   onFolderDoubleClick?: (id: string) => void;
   onFileClick?: (id: string) => void;
   selected?: null | string;
+  contextMenuId?: string;
 };
 
 export function FileTable(props: FileTableProps) {
@@ -22,6 +24,7 @@ export function FileTable(props: FileTableProps) {
     onFolderDoubleClick = noop,
     onFileClick = noop,
     selected,
+    contextMenuId = 'file-table-context-menu',
   } = props;
 
   let files = React.useMemo(() => defaultSort(children), [children]);
@@ -46,7 +49,9 @@ export function FileTable(props: FileTableProps) {
           <tr
             className={
               'select-none cursor-pointer ' +
-              (selected !== f.id ? 'hover:bg-blue-100' : 'hover:bg-blue-200 bg-blue-300')
+              (selected !== f.id
+                ? 'hover:bg-blue-100'
+                : 'hover:bg-blue-200 bg-blue-300')
             }
             key={f.id}
             onClick={() => {
@@ -58,20 +63,38 @@ export function FileTable(props: FileTableProps) {
               }
             }}
           >
-            <td className="px-4 py-2 border-t border-b">
-              <SVG
-                src={isFolder(f) ? folder : file}
-                className="inline-block h-5 mr-4"
-              />
-              {f.name}
+            <td className="border-t border-b">
+              <ContextMenuTrigger
+                id={contextMenuId}
+                attributes={{ className: 'px-4 py-2' }}
+                collect={() => ({ id: f.id, name: f.name })}
+              >
+                <SVG
+                  src={isFolder(f) ? folder : file}
+                  className="inline-block h-5 mr-4"
+                />
+                {f.name}
+              </ContextMenuTrigger>
             </td>
-            <td className="px-4 py-2 border-t border-b text-gray-600">
-              {formatSize(isFile(f) ? f.size : null)}
+            <td className="border-t border-b text-gray-600">
+              <ContextMenuTrigger
+                id={contextMenuId}
+                attributes={{ className: 'px-4 py-2' }}
+                collect={() => ({ id: f.id, name: f.name })}
+              >
+                {formatSize(isFile(f) ? f.size : null)}
+              </ContextMenuTrigger>
             </td>
-            <td className="px-4 py-2 border-t border-b text-gray-600">
-              {formatDistance(new Date(f.modifiedTime), now, {
-                addSuffix: true,
-              })}
+            <td className="border-t border-b text-gray-600">
+              <ContextMenuTrigger
+                id={contextMenuId}
+                attributes={{ className: 'px-4 py-2' }}
+                collect={() => ({ id: f.id, name: f.name })}
+              >
+                {formatDistance(new Date(f.modifiedTime), now, {
+                  addSuffix: true,
+                })}
+              </ContextMenuTrigger>
             </td>
           </tr>
         ))}

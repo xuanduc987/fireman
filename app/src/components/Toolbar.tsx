@@ -2,7 +2,7 @@ import * as React from 'react';
 import SVG from 'react-inlinesvg';
 import addFolder from 'heroicons/outline/folder-add.svg';
 import addFiles from 'heroicons/outline/document-add.svg';
-import del from 'heroicons/outline/document-remove.svg';
+import del from 'heroicons/outline/trash.svg';
 
 import { noop } from '../utils';
 
