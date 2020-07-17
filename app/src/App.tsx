@@ -3,7 +3,7 @@ import './App.css';
 import { Provider, cacheExchange, createClient, dedupExchange } from 'urql';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import { multipartFetchExchange } from '@urql/exchange-multipart-fetch';
-import * as React from 'react';
+import React from 'react';
 
 import { GRAPHQL_URL } from './constants'
 import FileManager from './FileManager';

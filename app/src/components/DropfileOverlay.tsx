@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import SVG from 'react-inlinesvg';
 import cloud from 'heroicons/outline/cloud-upload.svg';
 
