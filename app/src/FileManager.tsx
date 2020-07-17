@@ -181,7 +181,7 @@ function FileManager() {
         <Toolbar
           buttons={
             selected
-              ? ['del', 'addFolder', 'addFiles']
+              ? ['rename', 'del', 'addFolder', 'addFiles']
               : ['addFolder', 'addFiles']
           }
           breadCrumbItems={f.path
@@ -197,6 +197,14 @@ function FileManager() {
             if (type === 'del') {
               if (!selected) return;
               remove(selected);
+            }
+            if (type === 'rename') {
+              if (!selected) return;
+              if (!isFolder(f)) return;
+              let file = f.children.find((f) => f.id === selected);
+              if (!file) return;
+              setOldname(file.name);
+              setRenameModalOpen(true);
             }
           }}
         />

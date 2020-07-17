@@ -3,10 +3,11 @@ import SVG from 'react-inlinesvg';
 import addFolder from 'heroicons/outline/folder-add.svg';
 import addFiles from 'heroicons/outline/document-add.svg';
 import del from 'heroicons/outline/trash.svg';
+import rename from 'heroicons/outline/pencil.svg';
 
 import { noop } from '../utils';
 
-type ButtonType = 'del' | 'addFolder' | 'addFiles';
+type ButtonType = 'del' | 'addFolder' | 'addFiles' | 'rename';
 
 export type ToolbarProps = {
   buttons: ButtonType[];
@@ -53,6 +54,7 @@ const icons = {
   del,
   addFolder,
   addFiles,
+  rename,
 };
 
 type ToolbarButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
