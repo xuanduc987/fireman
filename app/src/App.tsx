@@ -8,7 +8,7 @@ import * as React from 'react';
 import FileManager from './FileManager';
 
 const client = createClient({
-  url: 'http://localhost:5000',
+  url: 'http://localhost:5000/graphql',
   exchanges: [dedupExchange, cacheExchange, multipartFetchExchange],
 });
 interface AppProps {}

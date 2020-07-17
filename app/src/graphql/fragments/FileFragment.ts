@@ -12,6 +12,7 @@ export const FileFragment = gql`
     }
     ... on File {
       size
+      url
     }
   }
 `;

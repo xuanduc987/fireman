@@ -31,6 +31,7 @@ export type FileInfo = {
   modifiedTime: Scalars['DateTime'];
   name: Scalars['String'];
   path: Array<Folder>;
+  url: Scalars['String'];
 };
 
 
@@ -40,6 +41,7 @@ export type Folder = FileInfo & {
   modifiedTime: Scalars['DateTime'];
   name: Scalars['String'];
   path: Array<Folder>;
+  url: Scalars['String'];
   children: Array<FileInfo>;
 };
 
@@ -140,6 +142,7 @@ export type File = FileInfo & {
   modifiedTime: Scalars['DateTime'];
   name: Scalars['String'];
   path: Array<Folder>;
+  url: Scalars['String'];
   size: Scalars['Int'];
 };
 
@@ -267,7 +270,7 @@ type FileFragment_Folder_Fragment = (
 
 type FileFragment_File_Fragment = (
   { __typename: 'File' }
-  & Pick<File, 'size' | 'id' | 'name' | 'modifiedTime'>
+  & Pick<File, 'size' | 'url' | 'id' | 'name' | 'modifiedTime'>
   & { path: Array<(
     { __typename?: 'Folder' }
     & Pick<Folder, 'id' | 'name'>
@@ -288,6 +291,7 @@ export const FileFragmentFragmentDoc = gql`
   }
   ... on File {
     size
+    url
   }
 }
     `;

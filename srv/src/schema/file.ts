@@ -1,8 +1,16 @@
 import { gql } from 'apollo-server';
 
+import path from 'path';
+
 import { Context } from '../context';
 import { FileErrorData } from '../error';
-import { FileStat, uploadFiles, createFolder, removeFiles, renameFile } from '../fileApi';
+import {
+  FileStat,
+  uploadFiles,
+  createFolder,
+  removeFiles,
+  renameFile,
+} from '../fileApi';
 import { Resolvers } from '../generated/graphql';
 
 export const typeDef = gql`
@@ -18,6 +26,7 @@ export const typeDef = gql`
     modifiedTime: DateTime!
     name: String!
     path: [Folder!]!
+    url: String!
     size: Int!
   }
 
@@ -127,6 +136,7 @@ export const resolvers: Resolvers = {
   File: {
     ...common,
     size: filePropResolver('size'),
+    url: ({ id = '/' }) => path.join('/files', id),
   },
   Folder: {
     ...common,
@@ -156,8 +166,8 @@ export const resolvers: Resolvers = {
     removeFiles: async (_, { input }) => {
       return removeFiles(input.fileIds);
     },
-    renameFile: async(_, { input }) => {
-      return renameFile(input.fileId, input.name)
-    }
+    renameFile: async (_, { input }) => {
+      return renameFile(input.fileId, input.name);
+    },
   },
 };

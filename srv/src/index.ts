@@ -1,4 +1,6 @@
-import { ApolloServer } from 'apollo-server';
+import { ApolloServer } from 'apollo-server-express';
+import path from 'path';
+import express from 'express';
 
 import { createContext } from './context';
 import { resolvers, typeDefs } from './schema/index';
@@ -11,7 +13,12 @@ const server = new ApolloServer({
   context: createContext,
 });
 
-// The `listen` method launches a web server.
-server.listen({ port: PORT }).then(({ url }) => {
-  console.log(`🚀  Server ready at ${url}`);
-});
+const app = express();
+app.use(express.static(path.join(__dirname, '../public'), { dotfiles: 'allow' }));
+server.applyMiddleware({ app, path: '/graphql' });
+
+app.listen({ port: PORT }, () =>
+  console.log(
+    `🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`,
+  ),
+);
