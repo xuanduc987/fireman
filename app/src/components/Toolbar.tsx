@@ -1,11 +1,12 @@
 import * as React from 'react';
 import SVG from 'react-inlinesvg';
 import addFolder from 'heroicons/outline/folder-add.svg';
+import addFiles from 'heroicons/outline/document-add.svg';
 import del from 'heroicons/outline/document-remove.svg';
 
 import { noop } from '../utils';
 
-type ButtonType = 'del' | 'addFolder';
+type ButtonType = 'del' | 'addFolder' | 'addFiles';
 
 export type ToolbarProps = {
   buttons: ButtonType[];
@@ -51,6 +52,7 @@ export function Toolbar(props: ToolbarProps) {
 const icons = {
   del,
   addFolder,
+  addFiles,
 };
 
 type ToolbarButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -88,9 +90,7 @@ function BreadCrumbs(props: BreadcrumbsProps) {
             )}
             <li>
               {i === items.length - 1 ? (
-                <span className="py-1 px-2 rounded text-gray-700">
-                  {name}
-                </span>
+                <span className="py-1 px-2 rounded text-gray-700">{name}</span>
               ) : (
                 <a
                   className="hover:bg-gray-200 py-1 px-2 rounded text-blue-700"

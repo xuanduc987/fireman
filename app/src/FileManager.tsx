@@ -1,18 +1,24 @@
 import { useDropzone } from 'react-dropzone';
 import { useParams, useHistory } from 'react-router-dom';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useRef,
+} from 'react';
 
+import { CreateFolderModal } from './components/CreateFolderModal';
 import { DropfileOverlay } from './components/DropfileOverlay';
+import { FileTable } from './components/FileTable';
+import { Toolbar } from './components/Toolbar';
+import { isFolder } from './types';
+import { useDocTitle } from './hooks';
 import {
   useListQuery,
   useUploadMutation,
   useCreateFolderMutation,
 } from './generated/graphql';
-import { FileTable } from './components/FileTable';
-import { isFolder } from './types';
-import { useDocTitle } from './hooks';
-import { Toolbar } from './components/Toolbar';
-import { CreateFolderModal } from './components/CreateFolderModal';
 
 type UploadState = 'uploading' | 'fail' | 'done';
 
@@ -97,6 +103,8 @@ function FileManager() {
     console.table(uploading);
   }, [uploading]);
 
+  let inputFileRef = useRef<HTMLInputElement | null>(null);
+
   let { getRootProps, isDragActive } = useDropzone({
     onDrop,
     noClick: true,
@@ -116,14 +124,28 @@ function FileManager() {
   return (
     <div {...getRootProps()} className="container mx-auto h-full">
       <div className="px-4 pt-4 h-full flex flex-col">
+        <input
+          hidden
+          type="file"
+          multiple
+          ref={inputFileRef}
+          onChange={() => {
+            if (!inputFileRef.current) return;
+            onDrop([...(inputFileRef.current.files || [])]);
+          }}
+        />
         <Toolbar
-          buttons={['del', 'addFolder']}
+          buttons={['del', 'addFolder', 'addFiles']}
           breadCrumbItems={f.path
             .concat(f)
             .map((f) => ({ key: f.id, name: f.name }))}
           onBreadCrumbItemClick={move}
           onButtonClick={(type) => {
             if (type === 'addFolder') setNewfolderModalOpen(true);
+            if (type === 'addFiles') {
+              if (!inputFileRef.current) return;
+              inputFileRef.current.click();
+            }
           }}
         />
 
