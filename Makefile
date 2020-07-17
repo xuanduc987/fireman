@@ -1,12 +1,13 @@
-start: start-app start-srv
+dev: dev-app dev-srv
+stop: stop-app stop-srv stop-storybook
 
 stop-%:
 	@echo "Stop $* server"
 	-@xargs kill < logs/$*.pid
 
-start-%: logs stop-%
-	@echo "Start $* server"
-	cd $*; yarn start & echo "$$!" > "../logs/$*.pid"
+dev-%: logs stop-%
+	@echo "Start $* dev server"
+	cd $*; yarn dev & echo "$$!" > "../logs/$*.pid"
 
 storybook: logs
 	@echo "Start app storybook"
@@ -16,4 +17,4 @@ storybook: logs
 logs:
 	mkdir logs
 
-.PHONY: start start-% stop-% storybook
+.PHONY: dev dev-% stop stop-% storybook
