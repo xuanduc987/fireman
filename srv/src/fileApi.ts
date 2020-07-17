@@ -138,9 +138,11 @@ const removeFileRecur = async (fileId: string): Promise<[number, any[]]> => {
       let r = await Promise.all(
         children.map((f) => removeFileRecur(path.join(fileId, f))),
       );
-      result = r.reduce(([x, e1], [y, e2]) => [x + y, e1.concat(e2)]);
+      result = r.reduce(([x, e1], [y, e2]) => [x + y, e1.concat(e2)], [0, []]);
+      await fsp.rmdir(fn)
+    } else {
+      await fsp.unlink(fn)
     }
-    await fsp.unlink(fn);
     return [result[0] + 1, result[1]];
   } catch (_) {
     return [result[0], result[1].concat(fileNotFoundError(fileId))];
@@ -150,6 +152,6 @@ const removeFileRecur = async (fileId: string): Promise<[number, any[]]> => {
 export const removeFiles = async (fileIds: string[]) => {
   let [removed, errors] = (
     await Promise.all(fileIds.map(removeFileRecur))
-  ).reduce(([x, e1], [y, e2]) => [x + y, e1.concat(e2)]);
+  ).reduce(([x, e1], [y, e2]) => [x + y, e1.concat(e2)], [0, []]);
   return { removed, errors: errors.length ? errors : null };
 };
