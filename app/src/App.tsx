@@ -5,10 +5,11 @@ import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import { multipartFetchExchange } from '@urql/exchange-multipart-fetch';
 import * as React from 'react';
 
+import { GRAPHQL_URL } from './constants'
 import FileManager from './FileManager';
 
 const client = createClient({
-  url: 'http://localhost:5000/graphql',
+  url: GRAPHQL_URL,
   exchanges: [dedupExchange, cacheExchange, multipartFetchExchange],
 });
 interface AppProps {}

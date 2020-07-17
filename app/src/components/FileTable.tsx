@@ -5,15 +5,16 @@ import SVG from 'react-inlinesvg';
 import file from 'heroicons/outline/document.svg';
 import folder from 'heroicons/solid/folder.svg';
 
-import { FileInfo, Folder, isFile, isFolder } from '../types';
+import { FileInfo, FileT, Folder, isFile, isFolder } from '../types';
 import { noop } from '../utils';
 
 export type FileTableProps = {
   folder: Folder;
   className?: string;
-  onFolderDoubleClick?: (id: string) => void;
-  onFileClick?: (id: string) => void;
-  selected?: null | string;
+  onFolderDoubleClick?: (folder: Folder) => void;
+  onFileDoubleClick?: (file: FileT) => void;
+  onFileClick?: (file: FileInfo) => void;
+  selected?: null | FileInfo;
   contextMenuId?: string;
 };
 
@@ -22,6 +23,7 @@ export function FileTable(props: FileTableProps) {
     folder: { children = [] },
     className = '',
     onFolderDoubleClick = noop,
+    onFileDoubleClick = noop,
     onFileClick = noop,
     selected,
     contextMenuId = 'file-table-context-menu',
@@ -49,17 +51,19 @@ export function FileTable(props: FileTableProps) {
           <tr
             className={
               'select-none cursor-pointer ' +
-              (selected !== f.id
-                ? 'hover:bg-blue-100'
-                : 'hover:bg-blue-200 bg-blue-300')
+              (selected && selected.id === f.id
+                ? 'hover:bg-blue-200 bg-blue-300'
+                : 'hover:bg-blue-100')
             }
             key={f.id}
             onClick={() => {
-              onFileClick(f.id);
+              onFileClick(f);
             }}
             onDoubleClick={() => {
               if (isFolder(f)) {
-                onFolderDoubleClick(f.id);
+                onFolderDoubleClick(f);
+              } else {
+                onFileDoubleClick(f);
               }
             }}
           >
@@ -67,7 +71,7 @@ export function FileTable(props: FileTableProps) {
               <ContextMenuTrigger
                 id={contextMenuId}
                 attributes={{ className: 'px-4 py-2' }}
-                collect={() => ({ id: f.id, name: f.name })}
+                collect={() => ({ file: f })}
               >
                 <SVG
                   src={isFolder(f) ? folder : file}
@@ -80,7 +84,7 @@ export function FileTable(props: FileTableProps) {
               <ContextMenuTrigger
                 id={contextMenuId}
                 attributes={{ className: 'px-4 py-2' }}
-                collect={() => ({ id: f.id, name: f.name })}
+                collect={() => ({ file: f })}
               >
                 {formatSize(isFile(f) ? f.size : null)}
               </ContextMenuTrigger>
@@ -89,7 +93,7 @@ export function FileTable(props: FileTableProps) {
               <ContextMenuTrigger
                 id={contextMenuId}
                 attributes={{ className: 'px-4 py-2' }}
-                collect={() => ({ id: f.id, name: f.name })}
+                collect={() => ({ file: f })}
               >
                 {formatDistance(new Date(f.modifiedTime), now, {
                   addSuffix: true,

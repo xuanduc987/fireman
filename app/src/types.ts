@@ -13,6 +13,7 @@ export type Folder = FileCommon & {
 export type FileT = FileCommon & {
   __typename: 'File';
   size: number;
+  url: string;
 };
 
 export type FileInfo = Folder | FileT;

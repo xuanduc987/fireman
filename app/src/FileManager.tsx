@@ -14,18 +14,19 @@ import trash from 'heroicons/solid/trash.svg';
 
 import { CreateFolderModal } from './components/CreateFolderModal';
 import { DropfileOverlay } from './components/DropfileOverlay';
-import { FileTable } from './components/FileTable';
-import { RenameModal } from './components/RenameModal';
-import { Toolbar } from './components/Toolbar';
-import { isFolder } from './types';
 import {
   useCreateFolderMutation,
   useListQuery,
   useRemoveFilesMutation,
-  useUploadMutation,
   useRenameMutation,
+  useUploadMutation,
 } from './generated/graphql';
+import { FileInfo, FileT, isFolder } from './types';
+import { FileTable } from './components/FileTable';
+import { RenameModal } from './components/RenameModal';
+import { Toolbar } from './components/Toolbar';
 import { useDocTitle } from './hooks';
+import { SERVER_URL } from './constants';
 
 type UploadState = 'uploading' | 'fail' | 'done';
 
@@ -54,6 +55,10 @@ function FileManager() {
   let move = (id: string) => {
     if (id == '/') history.push('/');
     else history.push('/' + btoa(id));
+  };
+
+  let openFile = (file: FileT) => {
+    window.open(SERVER_URL + file.url);
   };
 
   let [list, execList] = useListQuery({ variables: { dir: workingDir } });
@@ -112,7 +117,7 @@ function FileManager() {
 
   let inputFileRef = useRef<HTMLInputElement | null>(null);
 
-  let [selected, setSelected] = useState<string | null>(null);
+  let [selected, setSelected] = useState<FileInfo | null>(null);
 
   let { getRootProps, isDragActive } = useDropzone({
     onDrop,
@@ -143,12 +148,12 @@ function FileManager() {
   let [oldName, setOldname] = useState('');
   let [renameModalOpen, setRenameModalOpen] = useState(false);
 
-  let rename = (fileId: string, name: string) => {
-    if (name == oldName) return;
+  let rename = (file: FileInfo, name: string) => {
+    if (name == file.name) return;
     renameFile(
       {
         input: {
-          fileId,
+          fileId: file.id,
           name,
         },
       },
@@ -196,14 +201,12 @@ function FileManager() {
             }
             if (type === 'del') {
               if (!selected) return;
-              remove(selected);
+              remove(selected.id);
             }
             if (type === 'rename') {
               if (!selected) return;
               if (!isFolder(f)) return;
-              let file = f.children.find((f) => f.id === selected);
-              if (!file) return;
-              setOldname(file.name);
+              setOldname(selected.name);
               setRenameModalOpen(true);
             }
           }}
@@ -213,9 +216,12 @@ function FileManager() {
           <FileTable
             className="border-t-0"
             folder={f}
-            onFolderDoubleClick={move}
-            onFileClick={(id) => {
-              setSelected((selected) => (selected === id ? null : id));
+            onFolderDoubleClick={({ id }) => move(id)}
+            onFileDoubleClick={(file) => openFile(file)}
+            onFileClick={(f) => {
+              setSelected((selected) =>
+                selected && selected.id === f.id ? null : f,
+              );
             }}
             selected={selected}
             contextMenuId="file-context-menu"
@@ -246,15 +252,16 @@ function FileManager() {
           rename(selected, name);
         }}
       />
+
       <ContextMenu
         id="file-context-menu"
         onShow={(e) => {
-          setSelected(e.detail.data.id);
+          setSelected(e.detail.data.file);
         }}
       >
         <MenuItem
-          onClick={(_, prop: { name: string }) => {
-            setOldname(prop.name);
+          onClick={(_, prop: { file: FileInfo }) => {
+            setOldname(prop.file.name);
             setRenameModalOpen(true);
           }}
         >
@@ -263,8 +270,8 @@ function FileManager() {
         </MenuItem>
 
         <MenuItem
-          onClick={(_, prop: { id: string }) => {
-            remove(prop.id);
+          onClick={(_, prop: { file: { id: string } }) => {
+            remove(prop.file.id);
           }}
         >
           <SVG src={trash} className="inline-block h-4 mr-2" />

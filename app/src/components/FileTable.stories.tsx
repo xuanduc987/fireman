@@ -24,6 +24,7 @@ let file = (name: string) => ({
   size: Math.random() * 10_000_000,
   modifiedTime: Date(),
   path: [],
+  url: '',
 });
 
 let dummyFolder = folder('dummy', [

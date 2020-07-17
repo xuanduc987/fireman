@@ -31,7 +31,6 @@ export type FileInfo = {
   modifiedTime: Scalars['DateTime'];
   name: Scalars['String'];
   path: Array<Folder>;
-  url: Scalars['String'];
 };
 
 
@@ -41,7 +40,6 @@ export type Folder = FileInfo & {
   modifiedTime: Scalars['DateTime'];
   name: Scalars['String'];
   path: Array<Folder>;
-  url: Scalars['String'];
   children: Array<FileInfo>;
 };
 
