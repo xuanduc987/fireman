@@ -7,7 +7,8 @@
     "lint": "prettier --check \"src/**/*.{js,jsx,ts,tsx}\"",
     "codegen": "graphql-codegen -c .graphqlconfig.yaml",
     "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook"
+    "build-storybook": "build-storybook",
+    "heroku-postbuild": "yarn build"
   },
   "dependencies": {
     "@urql/exchange-multipart-fetch": "^0.1.8",
