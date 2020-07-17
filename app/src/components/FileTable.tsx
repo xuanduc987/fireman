@@ -11,6 +11,8 @@ export type FileTableProps = {
   folder: Folder;
   className?: string;
   onFolderDoubleClick?: (id: string) => void;
+  onFileClick?: (id: string) => void;
+  selected?: null | string;
 };
 
 export function FileTable(props: FileTableProps) {
@@ -18,6 +20,8 @@ export function FileTable(props: FileTableProps) {
     folder: { children = [] },
     className = '',
     onFolderDoubleClick = noop,
+    onFileClick = noop,
+    selected,
   } = props;
 
   let files = React.useMemo(() => defaultSort(children), [children]);
@@ -25,7 +29,11 @@ export function FileTable(props: FileTableProps) {
   let now = new Date();
 
   return (
-    <table className={'table-auto border w-full whitespace-no-wrap text-sm ' + className}>
+    <table
+      className={
+        'table-auto border w-full whitespace-no-wrap text-sm ' + className
+      }
+    >
       <thead>
         <tr className="bg-gray-100 border-b">
           <th className="px-4 py-2 border-l border-r w-full">Name</th>
@@ -36,8 +44,14 @@ export function FileTable(props: FileTableProps) {
       <tbody>
         {files.map((f) => (
           <tr
-            className="select-none cursor-pointer hover:bg-blue-100"
+            className={
+              'select-none cursor-pointer ' +
+              (selected !== f.id ? 'hover:bg-blue-100' : 'hover:bg-blue-200 bg-blue-300')
+            }
             key={f.id}
+            onClick={() => {
+              onFileClick(f.id);
+            }}
             onDoubleClick={() => {
               if (isFolder(f)) {
                 onFolderDoubleClick(f.id);
@@ -51,10 +65,10 @@ export function FileTable(props: FileTableProps) {
               />
               {f.name}
             </td>
-            <td className="px-4 py-2 border-t border-b text-gray-500">
+            <td className="px-4 py-2 border-t border-b text-gray-600">
               {formatSize(isFile(f) ? f.size : null)}
             </td>
-            <td className="px-4 py-2 border-t border-b text-gray-500">
+            <td className="px-4 py-2 border-t border-b text-gray-600">
               {formatDistance(new Date(f.modifiedTime), now, {
                 addSuffix: true,
               })}
@@ -67,8 +81,8 @@ export function FileTable(props: FileTableProps) {
 }
 
 const round = (n: number): number => {
-  return Math.round(n * 10)/10
-}
+  return Math.round(n * 10) / 10;
+};
 
 const formatSize = (size?: number | null) => {
   if (size == undefined || size == null) return '---';

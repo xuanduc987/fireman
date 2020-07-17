@@ -173,6 +173,23 @@ export type ListQuery = (
   ) }
 );
 
+export type RemoveFilesMutationVariables = Exact<{
+  input: RemoveFilesInput;
+}>;
+
+
+export type RemoveFilesMutation = (
+  { __typename?: 'Mutation' }
+  & { removeFiles: (
+    { __typename?: 'RemoveFilesPayload' }
+    & Pick<RemoveFilesPayload, 'removed'>
+    & { errors?: Maybe<Array<(
+      { __typename?: 'FileNotFoundError' }
+      & Pick<FileNotFoundError, 'message' | 'fileId'>
+    )>> }
+  ) }
+);
+
 export type UploadMutationVariables = Exact<{
   input: UploadFilesInput;
 }>;
@@ -265,6 +282,21 @@ export const ListDocument = gql`
 
 export function useListQuery(options: Omit<Urql.UseQueryArgs<ListQueryVariables>, 'query'> = {}) {
   return Urql.useQuery<ListQuery>({ query: ListDocument, ...options });
+};
+export const RemoveFilesDocument = gql`
+    mutation RemoveFiles($input: RemoveFilesInput!) {
+  removeFiles(input: $input) {
+    removed
+    errors {
+      message
+      fileId
+    }
+  }
+}
+    `;
+
+export function useRemoveFilesMutation() {
+  return Urql.useMutation<RemoveFilesMutation, RemoveFilesMutationVariables>(RemoveFilesDocument);
 };
 export const UploadDocument = gql`
     mutation Upload($input: UploadFilesInput!) {

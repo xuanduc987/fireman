@@ -18,6 +18,7 @@ import {
   useListQuery,
   useUploadMutation,
   useCreateFolderMutation,
+  useRemoveFilesMutation,
 } from './generated/graphql';
 
 type UploadState = 'uploading' | 'fail' | 'done';
@@ -96,7 +97,7 @@ function FileManager() {
         })
         .finally(execList);
     },
-    [uploading],
+    [uploading, workingDir],
   );
 
   useEffect(() => {
@@ -104,6 +105,8 @@ function FileManager() {
   }, [uploading]);
 
   let inputFileRef = useRef<HTMLInputElement | null>(null);
+
+  let [selected, setSelected] = useState<string | null>(null);
 
   let { getRootProps, isDragActive } = useDropzone({
     onDrop,
@@ -114,6 +117,7 @@ function FileManager() {
   let [newFolderModalOpen, setNewfolderModalOpen] = useState(false);
 
   let [, createFolder] = useCreateFolderMutation();
+  let [, removeFiles] = useRemoveFilesMutation();
 
   if (list.fetching || !list.data) return <p>Loading...</p>;
   if (list.error) return <p>Errored!</p>;
@@ -135,7 +139,11 @@ function FileManager() {
           }}
         />
         <Toolbar
-          buttons={['del', 'addFolder', 'addFiles']}
+          buttons={
+            selected
+              ? ['del', 'addFolder', 'addFiles']
+              : ['addFolder', 'addFiles']
+          }
           breadCrumbItems={f.path
             .concat(f)
             .map((f) => ({ key: f.id, name: f.name }))}
@@ -146,6 +154,20 @@ function FileManager() {
               if (!inputFileRef.current) return;
               inputFileRef.current.click();
             }
+            if (type === 'del') {
+              if (!selected) return;
+              removeFiles(
+                {
+                  input: {
+                    fileIds: [selected],
+                  },
+                },
+                { additionalTypenames: ['File', 'Folder'] },
+              ).finally(() => {
+                setSelected(null);
+                execList();
+              });
+            }
           }}
         />
 
@@ -154,6 +176,10 @@ function FileManager() {
             className="border-t-0"
             folder={f}
             onFolderDoubleClick={move}
+            onFileClick={(id) => {
+              setSelected((selected) => (selected === id ? null : id));
+            }}
+            selected={selected}
           />
           {isDragActive && <DropfileOverlay />}
         </div>
