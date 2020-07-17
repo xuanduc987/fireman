@@ -1,7 +1,8 @@
 import { gql } from 'apollo-server';
 
 import { Context } from '../context';
-import { FileStat, uploadFiles, createFolder, removeFiles } from '../fileApi';
+import { FileErrorData } from '../error';
+import { FileStat, uploadFiles, createFolder, removeFiles, renameFile } from '../fileApi';
 import { Resolvers } from '../generated/graphql';
 
 export const typeDef = gql`
@@ -76,10 +77,28 @@ export const typeDef = gql`
     errors: [FileNotFoundError!]
   }
 
+  type RenameFileInput {
+    fileId: ID!
+    name: String!
+  }
+
+  input RenameFileInput {
+    fileId: ID!
+    name: String!
+  }
+
+  union FileError = FileNotFoundError | FileExistError
+
+  type RenameFilePayload {
+    file: FileInfo
+    error: FileError
+  }
+
   type Mutation {
     uploadFiles(input: UploadFilesInput!): UploadFilesPayload!
     createFolder(input: CreateFolderInput!): CreateFolderPayload!
     removeFiles(input: RemoveFilesInput!): RemoveFilesPayload!
+    renameFile(input: RenameFileInput!): RenameFilePayload!
   }
 `;
 
@@ -115,19 +134,30 @@ export const resolvers: Resolvers = {
       return await dirLoader.load(id);
     },
   },
+  FileError: {
+    __resolveType: (parent: any) => {
+      let code = (parent as FileErrorData).code;
+      if (code === 'EEXIST') return 'FileExistError';
+      if (code === 'ENOENT') return 'FileNotFoundError';
+      throw new Error(`Unknown error ${parent}`);
+    },
+  },
   Query: {
     fileById: (_, { id }) => ({ id: id ? id : '/' }),
   },
   Mutation: {
     uploadFiles: async (_, { input }) => {
-      let { files, parent } = input
-      return await uploadFiles(parent, files)
+      let { files, parent } = input;
+      return await uploadFiles(parent, files);
     },
     createFolder: async (_, { input }) => {
-      return createFolder(input.parent, input.name)
+      return createFolder(input.parent, input.name);
     },
     removeFiles: async (_, { input }) => {
-      return removeFiles(input.fileIds)
+      return removeFiles(input.fileIds);
+    },
+    renameFile: async(_, { input }) => {
+      return renameFile(input.fileId, input.name)
     }
   },
 };

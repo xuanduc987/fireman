@@ -2,6 +2,7 @@ import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from '
 import { Context } from '../context';
 export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: any }> = { [K in keyof T]: T[K] };
+export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 export type RequireFields<T, K extends keyof T> = { [X in Exclude<keyof T, K>]?: T[X] } & { [P in K]-?: NonNullable<T[P]> };
 export type DeepPartial<T> = T extends Function ? T : (T extends object ? T extends { id: any } ? { [P in keyof Omit<T, 'id'>]?: DeepPartial<T[P]>; } & Pick<T, 'id'> : { [P in keyof T]?: DeepPartial<T[P]>; } : T);
 /** All built-in and custom scalars, mapped to their actual values */
@@ -43,6 +44,8 @@ export type File = FileInfo & {
   size: Scalars['Int'];
 };
 
+export type FileError = FileNotFoundError | FileExistError;
+
 export type FileExistError = {
   __typename?: 'FileExistError';
   message: Scalars['String'];
@@ -76,6 +79,7 @@ export type Mutation = {
   uploadFiles: UploadFilesPayload;
   createFolder: CreateFolderPayload;
   removeFiles: RemoveFilesPayload;
+  renameFile: RenameFilePayload;
 };
 
 
@@ -91,6 +95,11 @@ export type MutationCreateFolderArgs = {
 
 export type MutationRemoveFilesArgs = {
   input: RemoveFilesInput;
+};
+
+
+export type MutationRenameFileArgs = {
+  input: RenameFileInput;
 };
 
 export type Query = {
@@ -111,6 +120,17 @@ export type RemoveFilesPayload = {
   __typename?: 'RemoveFilesPayload';
   removed: Scalars['Int'];
   errors?: Maybe<Array<FileNotFoundError>>;
+};
+
+export type RenameFileInput = {
+  fileId: Scalars['ID'];
+  name: Scalars['String'];
+};
+
+export type RenameFilePayload = {
+  __typename?: 'RenameFilePayload';
+  file?: Maybe<FileInfo>;
+  error?: Maybe<FileError>;
 };
 
 
@@ -226,6 +246,9 @@ export type ResolversTypes = {
   RemoveFilesPayload: ResolverTypeWrapper<DeepPartial<RemoveFilesPayload>>;
   Int: ResolverTypeWrapper<DeepPartial<Scalars['Int']>>;
   FileNotFoundError: ResolverTypeWrapper<DeepPartial<FileNotFoundError>>;
+  RenameFileInput: ResolverTypeWrapper<DeepPartial<RenameFileInput>>;
+  RenameFilePayload: ResolverTypeWrapper<DeepPartial<Omit<RenameFilePayload, 'error'> & { error?: Maybe<ResolversTypes['FileError']> }>>;
+  FileError: DeepPartial<ResolversTypes['FileNotFoundError'] | ResolversTypes['FileExistError']>;
   Boolean: ResolverTypeWrapper<DeepPartial<Scalars['Boolean']>>;
   File: ResolverTypeWrapper<DeepPartial<File>>;
   CacheControlScope: ResolverTypeWrapper<DeepPartial<CacheControlScope>>;
@@ -251,6 +274,9 @@ export type ResolversParentTypes = {
   RemoveFilesPayload: DeepPartial<RemoveFilesPayload>;
   Int: DeepPartial<Scalars['Int']>;
   FileNotFoundError: DeepPartial<FileNotFoundError>;
+  RenameFileInput: DeepPartial<RenameFileInput>;
+  RenameFilePayload: DeepPartial<Omit<RenameFilePayload, 'error'> & { error?: Maybe<ResolversParentTypes['FileError']> }>;
+  FileError: DeepPartial<ResolversParentTypes['FileNotFoundError'] | ResolversParentTypes['FileExistError']>;
   Boolean: DeepPartial<Scalars['Boolean']>;
   File: DeepPartial<File>;
 };
@@ -272,6 +298,10 @@ export type FileResolvers<ContextType = Context, ParentType extends ResolversPar
   path?: Resolver<Array<ResolversTypes['Folder']>, ParentType, ContextType>;
   size?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType>;
+};
+
+export type FileErrorResolvers<ContextType = Context, ParentType extends ResolversParentTypes['FileError'] = ResolversParentTypes['FileError']> = {
+  __resolveType: TypeResolveFn<'FileNotFoundError' | 'FileExistError', ParentType, ContextType>;
 };
 
 export type FileExistErrorResolvers<ContextType = Context, ParentType extends ResolversParentTypes['FileExistError'] = ResolversParentTypes['FileExistError']> = {
@@ -307,6 +337,7 @@ export type MutationResolvers<ContextType = Context, ParentType extends Resolver
   uploadFiles?: Resolver<ResolversTypes['UploadFilesPayload'], ParentType, ContextType, RequireFields<MutationUploadFilesArgs, 'input'>>;
   createFolder?: Resolver<ResolversTypes['CreateFolderPayload'], ParentType, ContextType, RequireFields<MutationCreateFolderArgs, 'input'>>;
   removeFiles?: Resolver<ResolversTypes['RemoveFilesPayload'], ParentType, ContextType, RequireFields<MutationRemoveFilesArgs, 'input'>>;
+  renameFile?: Resolver<ResolversTypes['RenameFilePayload'], ParentType, ContextType, RequireFields<MutationRenameFileArgs, 'input'>>;
 };
 
 export type QueryResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
@@ -316,6 +347,12 @@ export type QueryResolvers<ContextType = Context, ParentType extends ResolversPa
 export type RemoveFilesPayloadResolvers<ContextType = Context, ParentType extends ResolversParentTypes['RemoveFilesPayload'] = ResolversParentTypes['RemoveFilesPayload']> = {
   removed?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   errors?: Resolver<Maybe<Array<ResolversTypes['FileNotFoundError']>>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType>;
+};
+
+export type RenameFilePayloadResolvers<ContextType = Context, ParentType extends ResolversParentTypes['RenameFilePayload'] = ResolversParentTypes['RenameFilePayload']> = {
+  file?: Resolver<Maybe<ResolversTypes['FileInfo']>, ParentType, ContextType>;
+  error?: Resolver<Maybe<ResolversTypes['FileError']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType>;
 };
 
@@ -333,6 +370,7 @@ export type Resolvers<ContextType = Context> = {
   CreateFolderPayload?: CreateFolderPayloadResolvers<ContextType>;
   DateTime?: GraphQLScalarType;
   File?: FileResolvers<ContextType>;
+  FileError?: FileErrorResolvers;
   FileExistError?: FileExistErrorResolvers<ContextType>;
   FileInfo?: FileInfoResolvers;
   FileNotFoundError?: FileNotFoundErrorResolvers<ContextType>;
@@ -340,6 +378,7 @@ export type Resolvers<ContextType = Context> = {
   Mutation?: MutationResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   RemoveFilesPayload?: RemoveFilesPayloadResolvers<ContextType>;
+  RenameFilePayload?: RenameFilePayloadResolvers<ContextType>;
   Upload?: GraphQLScalarType;
   UploadFilesPayload?: UploadFilesPayloadResolvers<ContextType>;
 };

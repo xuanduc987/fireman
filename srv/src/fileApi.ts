@@ -139,9 +139,9 @@ const removeFileRecur = async (fileId: string): Promise<[number, any[]]> => {
         children.map((f) => removeFileRecur(path.join(fileId, f))),
       );
       result = r.reduce(([x, e1], [y, e2]) => [x + y, e1.concat(e2)], [0, []]);
-      await fsp.rmdir(fn)
+      await fsp.rmdir(fn);
     } else {
-      await fsp.unlink(fn)
+      await fsp.unlink(fn);
     }
     return [result[0] + 1, result[1]];
   } catch (_) {
@@ -154,4 +154,25 @@ export const removeFiles = async (fileIds: string[]) => {
     await Promise.all(fileIds.map(removeFileRecur))
   ).reduce(([x, e1], [y, e2]) => [x + y, e1.concat(e2)], [0, []]);
   return { removed, errors: errors.length ? errors : null };
+};
+
+export const renameFile = async (id: string, name: string) => {
+  let oldname = normalize(id);
+  let parent = path.dirname(oldname);
+  let newname = path.join(parent, name);
+  try {
+    await fsp.stat(oldname);
+  } catch (_) {
+    return { error: fileNotFoundError(id) };
+  }
+  let exist = false;
+  try {
+    await fsp.stat(newname);
+    exist = true;
+  } catch {
+    exist = false;
+  }
+  if (exist) return { error: fileExistError(name) };
+  await fsp.rename(oldname, newname);
+  return { file: { id: toId(newname) } };
 };
